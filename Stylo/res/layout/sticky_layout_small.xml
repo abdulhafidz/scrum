@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="80dp"
+    android:layout_height="115dp"
+    android:background="@drawable/post_it"
+    android:orientation="vertical"
+    android:paddingLeft="8dp"
+    android:paddingRight="10dp"
+    android:paddingTop="8dp" >
+
+    <TextView
+        android:id="@+id/taskNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="#440742"
+        android:textColor="#000000"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/taskTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:text="Lorem ipsum dolor sit amet, consectetur. satu dua tiga empat lima enam tujuh."
+        android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/taskOwner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#0000FF"
+        android:text="TextView"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+</LinearLayout>

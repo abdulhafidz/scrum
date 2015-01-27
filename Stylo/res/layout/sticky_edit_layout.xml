@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFF66" >
+
+    <EditText
+        android:id="@+id/taskEditTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="20dp"
+        android:ems="10"
+        android:hint="Title" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/taskEditDes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/taskEditTitle"
+        android:layout_below="@+id/taskEditTitle"
+        android:ems="10"
+        android:hint="Description"
+        android:inputType="textMultiLine"
+        android:lines="5" />
+
+    <Button
+        android:id="@+id/taskEditSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/taskEditDes"
+        android:layout_below="@+id/taskEditDes"
+        android:drawableLeft="@android:drawable/ic_menu_save"
+        android:text="Save" />
+
+    <Button
+        android:id="@+id/taskEditCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/taskEditSave"
+        android:layout_alignBottom="@+id/taskEditSave"
+        android:layout_toRightOf="@+id/taskEditSave"
+        android:drawableLeft="@android:drawable/ic_menu_close_clear_cancel"
+        android:text="Cancel" />
+
+</RelativeLayout>
