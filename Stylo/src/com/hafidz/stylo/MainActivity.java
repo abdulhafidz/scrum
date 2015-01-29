@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
 		// whiteboardView.addView(whiteBoardLayout);
 		whiteboardView.addView(whiteBoardScroller);
 
-		int textTop = toPixelsHeight(1);
+		int textTop = 5;
 
 		// whiteboard texts
 		// TextView todoText = new TextView(getApplicationContext());
@@ -164,10 +164,6 @@ public class MainActivity extends Activity {
 
 	int toPixelsWidth(int percentage) {
 		return Util.toPixelsWidth(getApplicationContext(), percentage);
-	}
-
-	int toPixelsHeight(int percentage) {
-		return Util.toPixelsHeight(getApplicationContext(), percentage);
 	}
 
 }

@@ -23,7 +23,7 @@ public class WhiteBoardScroller extends ScrollView {
 
 		// draw whiteboard backgrounds
 		paint = new Paint();
-		paint.setStrokeWidth(toPixels(3));
+		paint.setStrokeWidth(5);
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeJoin(Paint.Join.ROUND);
 		paint.setStrokeCap(Paint.Cap.ROUND);
@@ -46,11 +46,10 @@ public class WhiteBoardScroller extends ScrollView {
 		// canvas.drawLine(toPixels(10), toPixels(40), toPixels(940),
 		// toPixels(40), paint);
 
-		int topStart = toPixelsHeight(2);
-		//int bottomEnd = toPixelsHeight(98);
+		int topStart = 5;
+		// int bottomEnd = toPixelsHeight(98);
 		int bottomEnd = 1990;
 
-		int leftStart = toPixelsWidth(2);
 		int rightEnd = toPixelsWidth(98);
 
 		// lines
@@ -61,21 +60,16 @@ public class WhiteBoardScroller extends ScrollView {
 		canvas.drawLine(toPixelsWidth(70), topStart, toPixelsWidth(70),
 				bottomEnd, paint);
 
-		canvas.drawLine(toPixels(10), toPixelsHeight(7), rightEnd,
-				toPixelsHeight(7), paint);
+		canvas.drawLine(10, 50, rightEnd, 50, paint);
 
 	}
 
-	int toPixels(float dp) {
-		return Util.toPixels(context, dp);
-	}
+	// int toPixels(float dp) {
+	// return Util.toPixels(context, dp);
+	// }
 
 	int toPixelsWidth(int percentage) {
 		return Util.toPixelsWidth(context, percentage);
-	}
-
-	int toPixelsHeight(int percentage) {
-		return Util.toPixelsHeight(context, percentage);
 	}
 
 }

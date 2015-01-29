@@ -26,15 +26,12 @@ import com.hafidz.stylo.model.TaskManager;
 public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		OnLongClickListener {
 
-	// public static int STICKY_X_OFFSET = 70;
-	// public static int STICKY_Y_OFFSET = 100;
 
 	// percentage offset
-	public static int STICKY_X_OFFSET = 9;
-	public static int STICKY_Y_OFFSET = 19;
+	public static int STICKY_X_OFFSET = 8;
+	public static int STICKY_Y_OFFSET = 150;
 
-
-	public static int MEMBER_Y_OFFSET = 5;
+	public static int MEMBER_Y_OFFSET = 38;
 
 	private float wbTouchX;
 	private float wbTouchY;
@@ -83,11 +80,11 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 			// memberLayout.setWidth(toPixelsWidth(7));
 
 			LayoutParams memberLayoutParams = new LayoutParams(
-					toPixelsWidth(7), toPixelsHeight(10));
+					toPixelsWidth(7), 75);
 			memberLayout.setLayoutParams(memberLayoutParams);
 
 			memberLayout.setX(toPixelsWidth(2));
-			memberLayout.setY(wbTouchY - toPixelsHeight(MEMBER_Y_OFFSET));
+			memberLayout.setY(wbTouchY - MEMBER_Y_OFFSET);
 
 			MemberListener memberListener = new MemberListener();
 			memberLayout.setOnDragListener(memberListener);
@@ -105,117 +102,18 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		LinearLayout stickyLayout = (LinearLayout) LayoutInflater.from(context)
 				.inflate(R.layout.sticky_layout_small, null);
 		stickyLayout.setX(wbTouchX - toPixelsWidth(STICKY_X_OFFSET));
-		stickyLayout.setY(wbTouchY - toPixelsHeight(STICKY_Y_OFFSET));
+		stickyLayout.setY(wbTouchY - STICKY_Y_OFFSET);
 		int stickyLayoutPadding = toPixelsWidth(2);
-//		if(stickyLayoutPadding > 25)
-//			stickyLayoutPadding = 25;
-		stickyLayout.setPadding(stickyLayoutPadding, stickyLayoutPadding, stickyLayoutPadding, stickyLayoutPadding);
+
+		stickyLayout.setPadding(stickyLayoutPadding, stickyLayoutPadding,
+				stickyLayoutPadding, stickyLayoutPadding);
 
 		// size
 		RelativeLayout.LayoutParams stickyLayoutParams = new RelativeLayout.LayoutParams(
-				toPixelsWidth(17), toPixelsHeight(37));
+				toPixelsWidth(17), 300);
 		stickyLayout.setLayoutParams(stickyLayoutParams);
 
 		// ////////////////////////////////////////
-
-		// // sticky layout
-		// RelativeLayout stickyLayout = new RelativeLayout(context);
-		// stickyLayout.setId(Util.generateViewId());
-		// stickyLayout.setBackgroundResource(R.drawable.post_it);
-		// // stickyLayout.setX(wbTouchX - toPixels(STICKY_X_OFFSET));
-		// // stickyLayout.setY(wbTouchY - toPixels(STICKY_Y_OFFSET));
-		// stickyLayout.setX(wbTouchX - toPixelsWidth(STICKY_X_OFFSET));
-		// stickyLayout.setY(wbTouchY - toPixelsHeight(STICKY_Y_OFFSET));
-		//
-		// // size
-		// RelativeLayout.LayoutParams stickyLayoutParams = new
-		// RelativeLayout.LayoutParams(
-		// toPixelsWidth(15), toPixelsHeight(30));
-		// stickyLayout.setLayoutParams(stickyLayoutParams);
-		//
-		// // sticky title
-		// TextView stickyTitle = new TextView(context);
-		// stickyTitle.setId(Util.generateViewId());
-		// RelativeLayout.LayoutParams stickyTitleLayoutParams = new
-		// RelativeLayout.LayoutParams(
-		// RelativeLayout.LayoutParams.WRAP_CONTENT,
-		// RelativeLayout.LayoutParams.WRAP_CONTENT);
-		// stickyTitleLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT,
-		// RelativeLayout.TRUE);
-		// stickyTitleLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP,
-		// RelativeLayout.TRUE);
-		// stickyTitleLayoutParams.setMargins(toPixels(20), toPixels(20), 0, 0);
-		// stickyTitle.setLayoutParams(stickyTitleLayoutParams);
-		// stickyTitle.setEllipsize(TextUtils.TruncateAt.END);
-		// stickyTitle.setHeight(toPixels(25));
-		// stickyTitle.setWidth(toPixels(115));
-		// stickyTitle.setMaxLines(1);
-		// stickyTitle.setSingleLine(true);
-		// stickyTitle.setTextColor(Color.BLACK);
-		// stickyTitle.setTextSize(17);
-		// stickyTitle.setTypeface(Typeface.DEFAULT_BOLD);
-		// String title = "Title Lorem Ipsum dolor sit amet.";
-		// stickyTitle.setText(Html.fromHtml("<u>" + title + "</u>"));
-		// stickyLayout.addView(stickyTitle);
-		//
-		// // sticky description
-		// TextView stickyDesc = new TextView(context);
-		// stickyDesc.setId(Util.generateViewId());
-		// RelativeLayout.LayoutParams stickyDescLayoutParams = new
-		// RelativeLayout.LayoutParams(
-		// RelativeLayout.LayoutParams.WRAP_CONTENT,
-		// RelativeLayout.LayoutParams.WRAP_CONTENT);
-		// stickyDescLayoutParams.addRule(RelativeLayout.ALIGN_LEFT,
-		// stickyTitle.getId());
-		// stickyDescLayoutParams.addRule(RelativeLayout.BELOW,
-		// stickyTitle.getId());
-		// stickyDesc.setLayoutParams(stickyDescLayoutParams);
-		// stickyDesc.setHeight(toPixels(70));
-		// stickyDesc.setWidth(toPixels(115));
-		// // stickyDesc
-		// //
-		// .setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisis felis suscipit quam mattis sodales. Aliquam placerat vehicula feugiat. Mauris in tellus id nunc sodales.");
-		// stickyDesc.setTextColor(Color.BLACK);
-		// stickyLayout.addView(stickyDesc);
-		//
-		// // sticky owner
-		// TextView stickyOwner = new TextView(context);
-		// stickyOwner.setId(Util.generateViewId());
-		// RelativeLayout.LayoutParams stickyOwnerLayoutParams = new
-		// RelativeLayout.LayoutParams(
-		// RelativeLayout.LayoutParams.WRAP_CONTENT,
-		// RelativeLayout.LayoutParams.WRAP_CONTENT);
-		// stickyOwnerLayoutParams.setMargins(0, toPixels(5), 0, 0);
-		// stickyOwnerLayoutParams.addRule(RelativeLayout.ALIGN_LEFT,
-		// stickyDesc.getId());
-		// stickyOwnerLayoutParams.addRule(RelativeLayout.BELOW,
-		// stickyDesc.getId());
-		// stickyOwner.setLayoutParams(stickyOwnerLayoutParams);
-		// // stickyOwner.setText("");
-		// stickyOwner.setTextColor(Color.WHITE);
-		// stickyOwner.setTextSize(16);
-		// stickyOwner.setBackgroundColor(Color.BLUE);
-		// stickyOwner.setTypeface(Typeface.DEFAULT_BOLD);
-		// stickyLayout.addView(stickyOwner);
-		//
-		// // sticky points
-		// TextView stickyPoints = new TextView(context);
-		// RelativeLayout.LayoutParams stickyPointsLayoutParams = new
-		// RelativeLayout.LayoutParams(
-		// RelativeLayout.LayoutParams.WRAP_CONTENT,
-		// RelativeLayout.LayoutParams.WRAP_CONTENT);
-		// stickyPointsLayoutParams.addRule(RelativeLayout.ALIGN_BASELINE,
-		// stickyOwner.getId());
-		// stickyPointsLayoutParams.addRule(RelativeLayout.ALIGN_BOTTOM,
-		// stickyOwner.getId());
-		// stickyPointsLayoutParams.addRule(RelativeLayout.ALIGN_RIGHT,
-		// stickyDesc.getId());
-		// stickyPoints.setLayoutParams(stickyPointsLayoutParams);
-		// // stickyPoints.setText("13");
-		// stickyPoints.setTextColor(Color.RED);
-		// stickyPoints.setTextSize(20);
-		// stickyPoints.setTypeface(Typeface.DEFAULT_BOLD);
-		// stickyLayout.addView(stickyPoints);
 
 		// add to whiteboard
 		RelativeLayout whiteBoard = (RelativeLayout) v;
@@ -233,9 +131,10 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		// stickyLayout.startDrag(null, shadow, stickyLayout, 0);
 		// //stickyLayout.setVisibility(View.INVISIBLE);
 
-		// update manager
-		Task task = new Task(stickyLayout.getId(), Util.toDP(context,
-				stickyLayout.getX()), Util.toDP(context, stickyLayout.getY()));
+		// update manager (for width we use percentage and for y we use fix
+		// pixels because whiteboard height is fixed)
+		Task task = new Task(stickyLayout.getId(), Util.toPercentageWidth(
+				context, stickyLayout.getX()), stickyLayout.getY());
 		TaskManager.add(task);
 
 		return true;
@@ -250,23 +149,25 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 			/* task dropped */
 			if (event.getLocalState() instanceof LinearLayout) {
 
-				LinearLayout postIt = (LinearLayout) event.getLocalState();
+				LinearLayout task = (LinearLayout) event.getLocalState();
 				float newX = event.getX() - toPixelsWidth(STICKY_X_OFFSET);
-				float newY = event.getY() - toPixelsHeight(STICKY_Y_OFFSET);
+				float newY = event.getY() - STICKY_Y_OFFSET;
 
 				// update manager
-				TaskManager.moved(postIt.getId(), Util.toDP(context, newX),
-						Util.toDP(context, newY));
+				TaskManager.obtainLock(task.getId());
+				TaskManager.moved(task.getId(),
+						Util.toPercentageWidth(context, newX), newY);
+				TaskManager.releaseLock(task.getId());
 
 				System.out.println("* * * * * drag dropped on whiteboard : "
-						+ postIt.getId());
+						+ task.getId());
 
 				// set post-it to new position
-				postIt.setX(event.getX() - toPixelsWidth(STICKY_X_OFFSET));
-				postIt.setY(event.getY() - toPixelsHeight(STICKY_Y_OFFSET));
+				task.setX(event.getX() - toPixelsWidth(STICKY_X_OFFSET));
+				task.setY(event.getY() - STICKY_Y_OFFSET);
 
 				// bring to front
-				postIt.bringToFront();
+				task.bringToFront();
 
 				// and make it visible
 				// postIt.setVisibility(View.VISIBLE);
@@ -276,13 +177,11 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 				GridLayout memberText = (GridLayout) event.getLocalState();
 
-				if (event.getX() <= toPixelsWidth(10)
-						&& event.getY() > toPixelsHeight(13)) {
+				if (event.getX() <= toPixelsWidth(10) && event.getY() > 52) {
 
 					// new member location
 					memberText.setX(toPixelsWidth(2));
-					memberText.setY(event.getY()
-							- toPixelsHeight(MEMBER_Y_OFFSET));
+					memberText.setY(event.getY() - MEMBER_Y_OFFSET);
 
 					memberText.bringToFront();
 
@@ -321,25 +220,8 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 	}
 
-	int toPixels(float dp) {
-		return Util.toPixels(context, dp);
-	}
-
 	int toPixelsWidth(int percentage) {
 		return Util.toPixelsWidth(context, percentage);
 	}
-
-	int toPixelsHeight(int percentage) {
-		return Util.toPixelsHeight(context, percentage);
-	}
-
-	// int toPixelsWidth(Float percentage) {
-	//
-	// return Util.toPixelsWidth(context, Math.round(percentage));
-	// }
-	//
-	// int toPixelsHeight(Float percentage) {
-	// return Util.toPixelsHeight(context, Math.round(percentage));
-	// }
 
 }

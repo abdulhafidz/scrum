@@ -16,17 +16,21 @@ import android.view.WindowManager;
  * 
  */
 public class Util {
-	public static int toPixels(Context context, float dp) {
-		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		float fpixels = metrics.density * dp;
-		return (int) (fpixels + 0.5f);
-	}
+//	public static int toPixels(Context context, float dp) {
+//		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+//		float fpixels = metrics.density * dp;
+//		return (int) (fpixels + 0.5f);
+//	}
 
-	public static float toDP(Context context, float pixels) {
-		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+	// public static float toDP(Context context, float pixels) {
+	// DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+	//
+	// return (pixels - 0.5f) / metrics.density;
+	//
+	// }
 
-		return (pixels - 0.5f) / metrics.density;
-
+	public static int toPercentageWidth(Context context, float pixels) {
+		return Math.round(pixels) * 100 / getScreenWidth(context);
 	}
 
 	private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
@@ -67,10 +71,11 @@ public class Util {
 
 	}
 
-	public static int toPixelsHeight(Context context, int percentage) {
-
-		return (percentage) * getScreenHeight(context) / 100;
-
-	}
+	// height is fix!!!
+	// public static int toPixelsHeight(Context context, int percentage) {
+	//
+	// return (percentage) * getScreenHeight(context) / 100;
+	//
+	// }
 
 }

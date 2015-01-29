@@ -25,12 +25,24 @@ public class TaskManager {
 		return true;
 	}
 
+	public static void releaseLock(int taskId) {
+	}
+
 	public static void moved(int taskId, float x, float y) {
 		// TODO : server side
 
 		// TODO : update status as well based on position
 
 		allTasks.get(String.valueOf(taskId)).setPos(x, y);
+	}
+
+	public static void updateTask(int taskId, String title, String desc) {
+		allTasks.get(String.valueOf(taskId)).setTitle(title);
+		allTasks.get(String.valueOf(taskId)).setDescription(desc);
+	}
+
+	public static Task load(int taskId) {
+		return allTasks.get(String.valueOf(taskId));
 	}
 
 }
