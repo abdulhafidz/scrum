@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
@@ -30,14 +31,9 @@ public class MainActivity extends Activity {
 	private RelativeLayout whiteBoardLayout;
 	private WhiteboardView whiteboardView;
 
-	// private Collection<String> teamMembers;
-	private Map<String, GridLayout> members;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		members = new HashMap<String, GridLayout>();
 
 		// setContentView(R.layout.activity_main);
 		whiteboardView = new WhiteboardView(getApplicationContext());
@@ -59,7 +55,7 @@ public class MainActivity extends Activity {
 
 		// white board listeners
 		WhiteBoardListener wbListener = new WhiteBoardListener(
-				MainActivity.this, members);
+				MainActivity.this);
 		whiteBoardLayout.setOnDragListener(wbListener);
 		whiteBoardLayout.setOnLongClickListener(wbListener);
 		whiteBoardLayout.setOnTouchListener(wbListener);
@@ -72,43 +68,6 @@ public class MainActivity extends Activity {
 		whiteboardView.addView(whiteBoardScroller);
 
 		int textTop = 5;
-
-		// whiteboard texts
-		// TextView todoText = new TextView(getApplicationContext());
-		// todoText.setText(Html
-		// .fromHtml("<u>"
-		// + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To-Do&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-		// + "</u>"));
-		// todoText.setTextSize(15);
-		// todoText.setTypeface(Typeface.DEFAULT_BOLD);
-		// todoText.setTextColor(Color.BLACK);
-		// todoText.setPaddingRelative(toPixelsWidth(22), textTop, 0, textTop);
-		// whiteBoardLayout.addView(todoText);
-		//
-		// TextView inProgressText = new TextView(getApplicationContext());
-		// inProgressText
-		// .setText(Html
-		// .fromHtml("<u>"
-		// +
-		// "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In Progress&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-		// + "</u>"));
-		// inProgressText.setTextSize(15);
-		// inProgressText.setTypeface(Typeface.DEFAULT_BOLD);
-		// inProgressText.setTextColor(Color.BLACK);
-		// inProgressText.setPaddingRelative(toPixelsWidth(50), textTop, 0,
-		// textTop);
-		// whiteBoardLayout.addView(inProgressText);
-		//
-		// TextView doneText = new TextView(getApplicationContext());
-		// doneText.setText(Html
-		// .fromHtml("<u>"
-		// + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Done&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-		// + "</u>"));
-		// doneText.setTextSize(15);
-		// doneText.setTypeface(Typeface.DEFAULT_BOLD);
-		// doneText.setTextColor(Color.BLACK);
-		// doneText.setPaddingRelative(toPixelsWidth(82), textTop, 0, textTop);
-		// whiteBoardLayout.addView(doneText);
 
 		// whiteboard texts
 		TextView todoText = new TextView(getApplicationContext());
@@ -136,15 +95,19 @@ public class MainActivity extends Activity {
 		doneText.setPaddingRelative(toPixelsWidth(82), textTop, 0, textTop);
 		whiteBoardLayout.addView(doneText);
 
-		// // inflate from layout xml
-		// ScrollView mainLayout = (ScrollView) LayoutInflater.from(
-		// getApplicationContext()).inflate(R.layout.activity_main, null);
-		//
-		// // add whiteboard to main layout
-		// mainLayout.addView(whiteBoardLayout);
-		//
-		// // set content view
-		// setContentView(mainLayout);
+		// garbage can
+		ImageView garbage = new ImageView(getApplicationContext());
+		garbage.setImageResource(android.R.drawable.ic_menu_delete);
+		garbage.setX(toPixelsWidth(88));
+		garbage.setY(Util.toPixelsHeight(getApplicationContext(), 80));
+		garbage.setLayoutParams(new LayoutParams(150, 150));
+		garbage.setOnDragListener(new GarbageListener(getApplicationContext()));
+		whiteboardView.addView(garbage);
+		Util.garbage = garbage;
+		Util.hideGarbage();
+
+		// add whiteboard to Util for easy access
+		Util.whiteboardLayout = whiteBoardLayout;
 
 	}
 

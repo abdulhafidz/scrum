@@ -5,6 +5,7 @@ package com.hafidz.stylo;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.widget.ScrollView;
 
@@ -28,6 +29,7 @@ public class WhiteBoardScroller extends ScrollView {
 		paint.setStrokeJoin(Paint.Join.ROUND);
 		paint.setStrokeCap(Paint.Cap.ROUND);
 		paint.setAntiAlias(true);
+		paint.setColor(Color.DKGRAY);
 
 	}
 

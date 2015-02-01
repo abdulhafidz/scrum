@@ -1,12 +1,6 @@
 package com.hafidz.stylo;
 
-import java.util.Map;
-
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.text.Html;
-import android.text.TextUtils;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -16,20 +10,20 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.GridLayout;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hafidz.stylo.model.Member;
+import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
 
 public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		OnLongClickListener {
 
-
 	// percentage offset
 	public static int STICKY_X_OFFSET = 8;
-	public static int STICKY_Y_OFFSET = 150;
+	public static int STICKY_Y_OFFSET = 175;
 
 	public static int MEMBER_Y_OFFSET = 38;
 
@@ -37,12 +31,13 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 	private float wbTouchY;
 
 	private Context context;
-	// private Map<String, TextView> members;
-	private Map<String, GridLayout> members;
 
-	public WhiteBoardListener(Context context, Map<String, GridLayout> members) {
+	// private Map<String, TextView> members;
+	// private Map<String, GridLayout> members;
+
+	public WhiteBoardListener(Context context) {
 		this.context = context;
-		this.members = members;
+		// this.members = members;
 
 	}
 
@@ -70,8 +65,10 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 			GridLayout memberLayout = (GridLayout) LayoutInflater.from(context)
 					.inflate(R.layout.member_layout, null);
+			
+			
 
-			String memberName = "Bot#" + members.size();
+			String memberName = "#" + MemberManager.allMembers.size();
 			TextView memberNameView = (TextView) memberLayout
 					.findViewById(R.id.memberName);
 			memberNameView.setText(memberName);
@@ -86,21 +83,27 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 			memberLayout.setX(toPixelsWidth(2));
 			memberLayout.setY(wbTouchY - MEMBER_Y_OFFSET);
 
-			MemberListener memberListener = new MemberListener();
+			MemberListener memberListener = new MemberListener(context);
 			memberLayout.setOnDragListener(memberListener);
 			memberLayout.setOnLongClickListener(memberListener);
+			memberLayout.setOnClickListener(memberListener);
 
 			whiteBoardLayout.addView(memberLayout);
 
 			// add to the global list of members
-			members.put(memberName, memberLayout);
+			Member member = new Member(memberName, "", false,
+					memberLayout.getY(), memberLayout);
+			MemberManager.add(member);
+			
+			MemberListener.showEditDialog(context, memberName,true);
 
 			return true;
 		}
 
 		// new small sticky layout
-		LinearLayout stickyLayout = (LinearLayout) LayoutInflater.from(context)
-				.inflate(R.layout.sticky_layout_small, null);
+		RelativeLayout stickyLayout = (RelativeLayout) LayoutInflater.from(
+				context).inflate(R.layout.sticky_layout_small, null);
+		stickyLayout.setId(Util.generateViewId());
 		stickyLayout.setX(wbTouchX - toPixelsWidth(STICKY_X_OFFSET));
 		stickyLayout.setY(wbTouchY - STICKY_Y_OFFSET);
 		int stickyLayoutPadding = toPixelsWidth(2);
@@ -110,7 +113,7 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 		// size
 		RelativeLayout.LayoutParams stickyLayoutParams = new RelativeLayout.LayoutParams(
-				toPixelsWidth(17), 300);
+				toPixelsWidth(17), 350);
 		stickyLayout.setLayoutParams(stickyLayoutParams);
 
 		// ////////////////////////////////////////
@@ -134,7 +137,8 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		// update manager (for width we use percentage and for y we use fix
 		// pixels because whiteboard height is fixed)
 		Task task = new Task(stickyLayout.getId(), Util.toPercentageWidth(
-				context, stickyLayout.getX()), stickyLayout.getY());
+				context, stickyLayout.getX()), stickyLayout.getY(),
+				stickyLayout);
 		TaskManager.add(task);
 
 		return true;
@@ -147,9 +151,9 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		case DragEvent.ACTION_DROP:
 
 			/* task dropped */
-			if (event.getLocalState() instanceof LinearLayout) {
+			if (event.getLocalState() instanceof RelativeLayout) {
 
-				LinearLayout task = (LinearLayout) event.getLocalState();
+				RelativeLayout task = (RelativeLayout) event.getLocalState();
 				float newX = event.getX() - toPixelsWidth(STICKY_X_OFFSET);
 				float newY = event.getY() - STICKY_Y_OFFSET;
 
@@ -204,8 +208,9 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 			break;
 
 		case DragEvent.ACTION_DRAG_ENDED:
-			if (event.getLocalState() instanceof LinearLayout) {
-				LinearLayout postIt = (LinearLayout) event.getLocalState();
+			Util.hideGarbage();
+			if (event.getLocalState() instanceof RelativeLayout) {
+				RelativeLayout postIt = (RelativeLayout) event.getLocalState();
 				postIt.setVisibility(View.VISIBLE);
 			} else {
 				System.out.println("* * * * * non sticky ended on whiteboard");

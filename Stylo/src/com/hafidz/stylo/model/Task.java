@@ -3,6 +3,9 @@
  */
 package com.hafidz.stylo.model;
 
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+
 /**
  * @author hafidz
  * 
@@ -17,16 +20,19 @@ public class Task {
 	private int id;
 	private String title;
 	private String description;
-	private String owner;
+	private Member owner;
 	private int points;
 	private int status;
 
 	private float posX;
 	private float posY;
 
-	public Task(int id, float posX, float posY) {
-		this.id = id;
+	// reference to the small task
+	private RelativeLayout smallTask;
 
+	public Task(int id, float posX, float posY, RelativeLayout smallTask) {
+		this.id = id;
+		this.setSmallTask(smallTask);
 		setPos(posX, posY);
 	}
 
@@ -44,14 +50,6 @@ public class Task {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public String getOwner() {
-		return owner;
-	}
-
-	public void setOwner(String owner) {
-		this.owner = owner;
 	}
 
 	public int getPoints() {
@@ -84,6 +82,22 @@ public class Task {
 
 		// TODO : from postion, get the status
 		this.status = STATUS_TODO;
+	}
+
+	public RelativeLayout getSmallTask() {
+		return smallTask;
+	}
+
+	public void setSmallTask(RelativeLayout smallTask) {
+		this.smallTask = smallTask;
+	}
+
+	public Member getOwner() {
+		return owner;
+	}
+
+	public void setOwner(Member owner) {
+		this.owner = owner;
 	}
 
 }

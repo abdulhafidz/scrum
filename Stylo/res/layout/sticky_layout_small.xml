@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
     android:layout_width="80dp"
-    android:layout_height="115dp"
+    android:layout_height="200dp"
     android:background="@drawable/post_it"
     android:orientation="vertical"
     android:paddingLeft="8dp"
@@ -9,31 +10,37 @@
     android:paddingTop="8dp" >
 
     <TextView
-        android:id="@+id/taskNumber"
+        android:id="@+id/smallTaskTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:ellipsize="end"
-        android:maxLines="1"
-        android:text="#440742"
+        android:maxLines="3"
         android:textColor="#000000"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/taskDetailTitle"
+        android:id="@+id/smallTaskDesc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/smallTaskTitle"
         android:ellipsize="end"
-        android:maxLines="4"
-        android:text="Lorem ipsum dolor sit amet, consectetur. satu dua tiga empat lima enam tujuh."
-        android:textColor="#000000" />
+        android:maxLines="5"
+        android:text="Touch me to edit"
+        android:textColor="#4d4d4d"
+        android:textSize="11sp" />
 
     <TextView
-        android:id="@+id/taskOwner"
+        android:id="@+id/smallTaskOwner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/smallTaskDesc"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="14dp"
         android:background="#0000FF"
-
         android:textColor="#FFFFFF"
         android:textStyle="bold" />
 
-</LinearLayout>
+</RelativeLayout>

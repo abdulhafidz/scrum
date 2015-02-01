@@ -1,110 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/TaskView"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/TaskViewLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFF66"
-    android:orientation="vertical"
-    android:paddingBottom="10dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="10dp" >
-
-    <TextView
-        android:id="@+id/taskDetailDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp"
-        android:text="Nulla facilisi. Mauris a iaculis elit. Ut ut ligula erat. Fusce at dignissim sem. In hac habitasse platea dictumst. Vivamus pretium sit amet ante commodo pharetra. Aliquam erat volutpat. In non lorem ut erat mattis cursus. Nulla imperdiet et neque a bibendum. Integer eu scelerisque elit. Sed sollicitudin fringilla libero sit amet scelerisque."
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#4D4D4D" />
+    android:layout_height="match_parent" >
 
     <LinearLayout
+        android:id="@+id/TaskView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="match_parent"
+        android:background="#FFFF66"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" >
 
+        <TextView
+            android:id="@+id/taskDetailDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:text="Nulla facilisi. Mauris a iaculis elit. Ut ut ligula erat. Fusce at dignissim sem. In hac habitasse platea dictumst. Vivamus pretium sit amet ante commodo pharetra. Aliquam erat volutpat. In non lorem ut erat mattis cursus. Nulla imperdiet et neque a bibendum. Integer eu scelerisque elit. Sed sollicitudin fringilla libero sit amet scelerisque."
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#4D4D4D" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </LinearLayout>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="6"
+            android:rowCount="2"
+            android:useDefaultMargins="true" >
+
+            <TextView
+                android:id="@+id/textView4"
+                android:text="Owner"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#4D4D4D" />
+
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=":"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/smallTaskOwner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:background="#0000FF"
+                android:text="Hafidz"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/TextView09"
+                android:text="Status"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#4D4D4D" />
+
+            <TextView
+                android:id="@+id/TextView06"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text=":"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/taskDetailStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="DONE"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#006600"
+                android:textStyle="bold" />
+        </GridLayout>
     </LinearLayout>
 
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:columnCount="6"
-        android:rowCount="2"
-        android:useDefaultMargins="true" >
-
-        <TextView
-            android:id="@+id/textView4"
-            android:text="Owner"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#4D4D4D" />
-
-        <TextView
-            android:id="@+id/TextView01"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=":"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#000000" />
-
-        <TextView
-            android:id="@+id/taskOwner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:background="#0000FF"
-            android:text="Hafidz"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/TextView08"
-            android:text="Estimate"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#4D4D4D" />
-
-        <TextView
-            android:id="@+id/TextView03"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text=":"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#000000" />
-
-        <TextView
-            android:id="@+id/taskDetailEstimate"
-            android:text="99"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="#FF0000"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/TextView09"
-            android:text="Status"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#4D4D4D" />
-
-        <TextView
-            android:id="@+id/TextView06"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text=":"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#000000" />
-
-        <TextView
-            android:id="@+id/taskDetailStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text="DONE"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#006600"
-            android:textStyle="bold" />
-
-    </GridLayout>
-
-</LinearLayout>
+</ScrollView>

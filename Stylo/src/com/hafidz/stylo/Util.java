@@ -9,18 +9,25 @@ import android.content.Context;
 import android.graphics.Point;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 /**
  * @author johariab
  * 
  */
 public class Util {
-//	public static int toPixels(Context context, float dp) {
-//		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-//		float fpixels = metrics.density * dp;
-//		return (int) (fpixels + 0.5f);
-//	}
+
+	public static ImageView garbage;
+	public static RelativeLayout whiteboardLayout;
+
+	// public static int toPixels(Context context, float dp) {
+	// DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+	// float fpixels = metrics.density * dp;
+	// return (int) (fpixels + 0.5f);
+	// }
 
 	// public static float toDP(Context context, float pixels) {
 	// DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -72,10 +79,18 @@ public class Util {
 	}
 
 	// height is fix!!!
-	// public static int toPixelsHeight(Context context, int percentage) {
-	//
-	// return (percentage) * getScreenHeight(context) / 100;
-	//
-	// }
+	public static int toPixelsHeight(Context context, int percentage) {
+
+		return (percentage) * getScreenHeight(context) / 100;
+
+	}
+
+	public static void showGarbage() {
+		garbage.setVisibility(View.VISIBLE);
+	}
+
+	public static void hideGarbage() {
+		garbage.setVisibility(View.GONE);
+	}
 
 }
