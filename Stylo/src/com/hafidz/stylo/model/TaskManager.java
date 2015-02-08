@@ -15,7 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.StickyListener;
+import com.hafidz.stylo.TaskStickerListener;
 import com.hafidz.stylo.Util;
 import com.hafidz.stylo.WhiteBoardListener;
 import com.hafidz.stylo.WhiteBoardScroller;
@@ -55,13 +55,16 @@ public class TaskManager {
 		// allTasks.get(taskId).setOwner(owner);
 
 		updateToDB(context, taskId, owner.getName());
+
+		Toast.makeText(context, owner.getName() + " assigned to a task.",
+				Toast.LENGTH_SHORT).show();
 	}
 
 	public static void updateStickerOwner(RelativeLayout sticker,
 			String newOwner, GridLayout memberSticker) {
 		// sticky note
 		TextView ownerText = (TextView) sticker
-				.findViewById(R.id.smallTaskOwner);
+				.findViewById(R.id.taskDetailOwner);
 		String oriOwner = ownerText.getText().toString();
 		ownerText.setText(newOwner);
 
@@ -110,7 +113,7 @@ public class TaskManager {
 
 		} else if (x >= WhiteBoardScroller.LINE_DONE
 				- WhiteBoardListener.STICKY_X_OFFSET) {
-			task.setStatus(Task.STATUS_IN_PROGRESS);
+			task.setStatus(Task.STATUS_DONE);
 
 			Toast.makeText(context, "Well done!", Toast.LENGTH_SHORT).show();
 
@@ -163,7 +166,7 @@ public class TaskManager {
 
 		String id = task.getId();
 
-		freeOwner(task, sticker);
+		freeOwner(context, task, sticker);
 
 		// RelativeLayout sticker = task.getSmallTask();
 
@@ -177,24 +180,61 @@ public class TaskManager {
 		Toast.makeText(context, "Task removed.", Toast.LENGTH_SHORT).show();
 	}
 
-	public static void freeOwner(Task task, RelativeLayout taskSticker) {
+	public static void freeOwner(Context context, Task task,
+			RelativeLayout taskSticker) {
 
-		// RelativeLayout taskSticker = task.getSmallTask();
 		TextView memberName = (TextView) taskSticker
-				.findViewById(R.id.smallTaskOwner);
+				.findViewById(R.id.taskDetailOwner);
+		String recoveredMemberName = memberName.getText().toString();
 		memberName.setText(null);
 
 		Member member = task.getOwner();
 		if (member != null) {
-			// GridLayout memberSticker = member.getMemberSticker();
+
+			String name = member.getName();
 
 			GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
-					.findViewWithTag(memberName);
+					.findViewWithTag(recoveredMemberName);
 			memberSticker.setVisibility(View.VISIBLE);
 			memberSticker.findViewById(R.id.memberName).setVisibility(
 					View.VISIBLE);
 
 			task.setOwner(null);
+
+			updateToDB(context, task.getId(), null);
+
+			// toast
+			Toast.makeText(context, name + " is now free.", Toast.LENGTH_SHORT)
+					.show();
+		}
+
+	}
+
+	public static void freeOwner(Context context, Task task) {
+
+		Member member = task.getOwner();
+		if (member != null) {
+			String name = task.getOwner().getName();
+			// GridLayout memberSticker = member.getMemberSticker();
+
+			GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
+					.findViewWithTag(member.getName());
+			memberSticker.setVisibility(View.VISIBLE);
+
+			task.setOwner(null);
+
+			updateToDB(context, task.getId(), null);
+
+			// update small task sticker
+			View smallTask = Util.whiteboardLayout
+					.findViewWithTag(task.getId());
+			TextView smallOwner = (TextView) smallTask
+					.findViewById(R.id.taskDetailOwner);
+			smallOwner.setText(null);
+
+			// toast
+			Toast.makeText(context, name + " is now free.", Toast.LENGTH_SHORT)
+					.show();
 		}
 
 	}
@@ -416,7 +456,7 @@ public class TaskManager {
 		whiteBoard.addView(stickyLayout);
 
 		// add listeners
-		StickyListener stickyListener = new StickyListener(context);
+		TaskStickerListener stickyListener = new TaskStickerListener(context);
 		// stickyLayout.setOnTouchListener(stickyListener);
 		stickyLayout.setOnDragListener(stickyListener);
 		stickyLayout.setOnLongClickListener(stickyListener);

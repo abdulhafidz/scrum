@@ -276,10 +276,10 @@ public class MemberManager {
 		// memberLayout.setWidth(toPixelsWidth(7));
 
 		LayoutParams memberLayoutParams = new LayoutParams(Util.toPixelsWidth(
-				context, 7), 75);
+				context, 8), 75);
 		memberSticker.setLayoutParams(memberLayoutParams);
 
-		memberSticker.setX(Util.toPixelsWidth(context, 2));
+		memberSticker.setX(Util.toPixelsWidth(context, 1));
 		memberSticker.setY(y);
 
 		MemberListener memberListener = new MemberListener(context);

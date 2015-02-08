@@ -3,6 +3,7 @@ package com.hafidz.stylo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,17 +18,18 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
 
-public class StickyListener implements OnDragListener, OnLongClickListener,
-		OnClickListener {
+public class TaskStickerListener implements OnDragListener,
+		OnLongClickListener, OnClickListener {
 
 	private Context context;
 
-	public StickyListener(Context context) {
+	public TaskStickerListener(Context context) {
 		this.context = context;
 	}
 
@@ -59,31 +61,6 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 				// task sticker and member sticker UI
 				TaskManager.updateStickerOwner(taskSticker, newOwner,
 						memberLayout);
-
-				// // sticky note
-				// TextView ownerText = (TextView) taskSticker
-				// .findViewById(R.id.taskDetailOwner);
-				// String oriOwner = ownerText.getText().toString();
-				// ownerText.setText(newOwner);
-				//
-				// // hide member
-				// //memberNameTV.setVisibility(View.GONE);
-				// memberLayout.setVisibility(View.GONE);
-				//
-				// // if replace existing owner, show replaced owner
-				// if (oriOwner != null && !oriOwner.trim().isEmpty()
-				// && !oriOwner.equals(newOwner)) {
-				// // put back the original member to the member pool
-				// GridLayout memberSticker = MemberManager.load(oriOwner)
-				// .getMemberSticker();
-				// memberSticker.setVisibility(View.VISIBLE);
-				// memberSticker.findViewById(R.id.memberName).setVisibility(
-				// View.VISIBLE);
-				//
-				// // position put to old position of new owner
-				// memberSticker.setY(memberLayout.getY());
-				//
-				// }
 
 				break;
 
@@ -118,17 +95,6 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 
 		Task task = TaskManager.load(context, (String) v.getTag());
 
-		System.out.println("task = = = = = = " + task);
-
-		System.out
-				.println("task.getId() = = = = = = = = = = = = = = = = = = = = = = = = = = ="
-						+ task.getId());
-
-		System.out.println("task.getTitle() = = = = = " + task.getTitle());
-
-		System.out.println("task.getDescription() = = = = = "
-				+ task.getDescription());
-
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -147,9 +113,43 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 		builder.setTitle(task.getTitle());
 		((TextView) viewTaskLayout.findViewById(R.id.taskDetailDesc))
 				.setText(task.getDescription());
-		if (task.getOwner() != null)
-			((TextView) viewTaskLayout.findViewById(R.id.smallTaskOwner))
+		TextView stat = (TextView) viewTaskLayout
+				.findViewById(R.id.taskDetailStatus);
+		switch (task.getStatus()) {
+		case Task.STATUS_IN_PROGRESS:
+			stat.setText("IN PROGRESS");
+			stat.setTextColor(Color.parseColor("#3F51B5"));
+			break;
+
+		case Task.STATUS_DONE:
+			stat.setText("DONE");
+			stat.setTextColor(Color.parseColor("#4CAF50"));
+			break;
+
+		case Task.STATUS_TODO:
+			stat.setText("TO-DO");
+			stat.setTextColor(Color.parseColor("#F44336"));
+			break;
+
+		case Task.STATUS_ROAD_BLOCK:
+			stat.setText("ROAD BLOCK");
+			stat.setTextColor(Color.parseColor("#9C27B0"));
+			break;
+		}
+
+		if (task.getOwner() != null) {
+			((TextView) viewTaskLayout.findViewById(R.id.taskDetailOwner))
 					.setText(task.getOwner().getName());
+
+			// add listeners to owner sticker
+			TextView owner = (TextView) viewTaskLayout
+					.findViewById(R.id.taskDetailOwner);
+			owner.setOnLongClickListener(new OwnerStickerListener());
+
+			// add listeners to view task layout
+			viewTaskLayout
+					.setOnDragListener(new TaskViewListener(context, task));
+		}
 
 		builder.setView(viewTaskLayout);
 
