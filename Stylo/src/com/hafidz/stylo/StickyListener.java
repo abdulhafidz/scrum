@@ -39,7 +39,7 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 
 				Util.hideGarbage();
 
-				RelativeLayout task = (RelativeLayout) v;
+				RelativeLayout taskSticker = (RelativeLayout) v;
 				GridLayout memberLayout = (GridLayout) event.getLocalState();
 				TextView memberNameTV = (TextView) memberLayout
 						.findViewById(R.id.memberName);
@@ -47,37 +47,43 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 				String newOwner = memberNameTV.getText().toString();
 
 				// update task manager
-				TaskManager.obtainLock(task.getId());
-				TaskManager.assignOwner(task.getId(),
-						MemberManager.load(newOwner));
-				TaskManager.releaseLock(task.getId());
+				String id = (String) taskSticker.getTag();
+				TaskManager.obtainLock(id);
+				TaskManager.assignOwner(context, id,
+						MemberManager.load(context, newOwner));
+				TaskManager.releaseLock(id);
 
 				System.out.println("* * * * * member " + newOwner
 						+ " dropped to task");
 
-				// sticky note
-				TextView ownerText = (TextView) task
-						.findViewById(R.id.smallTaskOwner);
-				String oriOwner = ownerText.getText().toString();
-				ownerText.setText(newOwner);
+				// task sticker and member sticker UI
+				TaskManager.updateStickerOwner(taskSticker, newOwner,
+						memberLayout);
 
-				// hide member
-				memberNameTV.setVisibility(View.GONE);
-
-				// if replace existing owner, show replaced owner
-				if (oriOwner != null && !oriOwner.trim().isEmpty()
-						&& !oriOwner.equals(newOwner)) {
-					// put back the original member to the member pool
-					GridLayout memberSticker = MemberManager.load(oriOwner)
-							.getMemberSticker();
-					memberSticker.setVisibility(View.VISIBLE);
-					memberSticker.findViewById(R.id.memberName).setVisibility(
-							View.VISIBLE);
-
-					// position put to old position of new owner
-					memberSticker.setY(memberLayout.getY());
-
-				}
+				// // sticky note
+				// TextView ownerText = (TextView) taskSticker
+				// .findViewById(R.id.taskDetailOwner);
+				// String oriOwner = ownerText.getText().toString();
+				// ownerText.setText(newOwner);
+				//
+				// // hide member
+				// //memberNameTV.setVisibility(View.GONE);
+				// memberLayout.setVisibility(View.GONE);
+				//
+				// // if replace existing owner, show replaced owner
+				// if (oriOwner != null && !oriOwner.trim().isEmpty()
+				// && !oriOwner.equals(newOwner)) {
+				// // put back the original member to the member pool
+				// GridLayout memberSticker = MemberManager.load(oriOwner)
+				// .getMemberSticker();
+				// memberSticker.setVisibility(View.VISIBLE);
+				// memberSticker.findViewById(R.id.memberName).setVisibility(
+				// View.VISIBLE);
+				//
+				// // position put to old position of new owner
+				// memberSticker.setY(memberLayout.getY());
+				//
+				// }
 
 				break;
 
@@ -110,11 +116,18 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 	@Override
 	public void onClick(View v) {
 
-		Task task = TaskManager.load(v.getId());
+		Task task = TaskManager.load(context, (String) v.getTag());
+
+		System.out.println("task = = = = = = " + task);
 
 		System.out
 				.println("task.getId() = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 						+ task.getId());
+
+		System.out.println("task.getTitle() = = = = = " + task.getTitle());
+
+		System.out.println("task.getDescription() = = = = = "
+				+ task.getDescription());
 
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -134,8 +147,9 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 		builder.setTitle(task.getTitle());
 		((TextView) viewTaskLayout.findViewById(R.id.taskDetailDesc))
 				.setText(task.getDescription());
-		((TextView) viewTaskLayout.findViewById(R.id.smallTaskOwner))
-				.setText(task.getOwner().getName());
+		if (task.getOwner() != null)
+			((TextView) viewTaskLayout.findViewById(R.id.smallTaskOwner))
+					.setText(task.getOwner().getName());
 
 		builder.setView(viewTaskLayout);
 
@@ -153,9 +167,9 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 			android.content.DialogInterface.OnClickListener {
 
 		private ScrollView stickyLayout;
-		private int taskId;
+		private String taskId;
 
-		public onClickEditButtonListener(int taskId, ScrollView stickyLayout) {
+		public onClickEditButtonListener(String taskId, ScrollView stickyLayout) {
 			this.stickyLayout = stickyLayout;
 			this.taskId = taskId;
 		}
@@ -168,7 +182,7 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 
 	}
 
-	private void showEditDialog(ScrollView stickyLayout, int taskId) {
+	private void showEditDialog(ScrollView stickyLayout, String taskId) {
 		// edit task dialog show
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
@@ -184,7 +198,7 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 		builder.setTitle("Edit Task");
 
 		// pre-populate with value
-		Task task = TaskManager.load(taskId);
+		Task task = TaskManager.load(context, taskId);
 		((EditText) editTaskLayout.findViewById(R.id.taskEditTitle))
 				.setText(task.getTitle());
 		((EditText) editTaskLayout.findViewById(R.id.taskEditDesc))
@@ -197,8 +211,8 @@ public class StickyListener implements OnDragListener, OnLongClickListener,
 		// overide save listener because we dont want to auto dismiss dialog
 		// after save
 		Button theButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-		theButton.setOnClickListener(new TaskEditListener(taskId, stickyLayout,
-				dialog));
+		theButton.setOnClickListener(new TaskEditListener(context, taskId,
+				stickyLayout, dialog));
 	}
 
 }

@@ -97,7 +97,7 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 		String memberId = ((TextView) memberSticker
 				.findViewById(R.id.memberName)).getText().toString();
 
-		Member member = MemberManager.load(memberId);
+		Member member = MemberManager.load(context, memberId);
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle(member.getName());
@@ -147,7 +147,7 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 				null, firstTime, context));
 
 		// pre-populate with value
-		Member member = MemberManager.load(memberName);
+		Member member = MemberManager.load(context, memberName);
 		((EditText) editMemberLayout.findViewById(R.id.memberEditName))
 				.setText(member.getName());
 		((EditText) editMemberLayout.findViewById(R.id.memberEditEmail))

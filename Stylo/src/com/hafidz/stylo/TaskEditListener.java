@@ -4,9 +4,11 @@
 package com.hafidz.stylo;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -19,14 +21,16 @@ import com.hafidz.stylo.model.TaskManager;
 public class TaskEditListener implements OnClickListener {
 
 	private ScrollView stickyLayout;
-	private int taskId;
+	private String taskId;
 	private Dialog editDialog;
+	private Context context;
 
-	public TaskEditListener(int taskId, ScrollView stickyLayout,
-			Dialog editDialog) {
+	public TaskEditListener(Context context, String taskId,
+			ScrollView stickyLayout, Dialog editDialog) {
 		this.stickyLayout = stickyLayout;
 		this.taskId = taskId;
 		this.editDialog = editDialog;
+		this.context = context;
 	}
 
 	// @Override
@@ -108,8 +112,9 @@ public class TaskEditListener implements OnClickListener {
 
 		// update manager
 		TaskManager.obtainLock(taskId);
-		TaskManager.updateTask(taskId, editTitle.getText().toString(), editDesc
-				.getText().toString());
+		TaskManager.updateTask(context, taskId, editTitle.getText().toString(),
+				editDesc.getText().toString(),
+				(RelativeLayout) Util.whiteboardLayout.findViewWithTag(taskId));
 		TaskManager.releaseLock(taskId);
 
 		editDialog.dismiss();

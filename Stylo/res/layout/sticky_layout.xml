@@ -8,7 +8,7 @@
         android:id="@+id/TaskView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFF66"
+        android:background="#FFEB3B"
         android:orientation="vertical"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
@@ -22,7 +22,7 @@
             android:paddingTop="10dp"
             android:text="Nulla facilisi. Mauris a iaculis elit. Ut ut ligula erat. Fusce at dignissim sem. In hac habitasse platea dictumst. Vivamus pretium sit amet ante commodo pharetra. Aliquam erat volutpat. In non lorem ut erat mattis cursus. Nulla imperdiet et neque a bibendum. Integer eu scelerisque elit. Sed sollicitudin fringilla libero sit amet scelerisque."
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#4D4D4D" />
+            android:textColor="#424242" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -40,7 +40,7 @@
                 android:id="@+id/textView4"
                 android:text="Owner"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#4D4D4D" />
+                android:textColor="#424242" />
 
             <TextView
                 android:id="@+id/TextView01"
@@ -48,15 +48,16 @@
                 android:layout_height="wrap_content"
                 android:text=":"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#000000" />
+                android:textColor="#424242" />
 
             <TextView
                 android:id="@+id/smallTaskOwner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
-                android:background="#0000FF"
-                android:text="Hafidz"
+                android:background="@layout/member_bg"
+                android:maxLines="1"
+                android:textAlignment="center"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
@@ -65,7 +66,7 @@
                 android:id="@+id/TextView09"
                 android:text="Status"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#4D4D4D" />
+                android:textColor="#424242" />
 
             <TextView
                 android:id="@+id/TextView06"
@@ -74,7 +75,7 @@
                 android:layout_gravity="left"
                 android:text=":"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#000000" />
+                android:textColor="#424242" />
 
             <TextView
                 android:id="@+id/taskDetailStatus"
@@ -83,7 +84,7 @@
                 android:layout_gravity="left"
                 android:text="DONE"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#006600"
+                android:textColor="#4CAF50"
                 android:textStyle="bold" />
         </GridLayout>
     </LinearLayout>

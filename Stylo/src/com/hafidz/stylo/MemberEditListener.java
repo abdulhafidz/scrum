@@ -49,8 +49,8 @@ public class MemberEditListener implements OnClickListener,
 			return;
 		}
 		if (!memberName.equals(editName.getText().toString())) {
-			if (MemberManager.allMembers.containsKey(editName.getText()
-					.toString())) {
+			if (MemberManager.getAll(context).containsKey(
+					editName.getText().toString())) {
 				editName.setError("Name is already taken. Please try other name.");
 				return;
 			}

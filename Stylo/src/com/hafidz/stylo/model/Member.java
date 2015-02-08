@@ -3,8 +3,8 @@ package com.hafidz.stylo.model;
 import android.widget.GridLayout;
 
 public class Member {
-	
-	//name is unique
+
+	// name is unique
 	private String name;
 	private String email;
 	private boolean me;
@@ -12,16 +12,25 @@ public class Member {
 	private float posY;
 
 	// Reference to member UI
-	private GridLayout memberSticker;
+	// private GridLayout memberSticker;
 
-	public Member(String name, String email, boolean me, float posY,
-			GridLayout memberSticker) {
+	// public Member(String name, String email, boolean me, float posY,
+	// GridLayout memberSticker) {
+	// super();
+	// this.name = name;
+	// this.email = email;
+	// this.me = me;
+	// this.posY = posY;
+	// this.memberSticker = memberSticker;
+	// }
+
+	public Member(String name, String email, boolean me, float posY) {
 		super();
 		this.name = name;
 		this.email = email;
 		this.me = me;
 		this.posY = posY;
-		this.memberSticker = memberSticker;
+
 	}
 
 	public String getName() {
@@ -36,13 +45,13 @@ public class Member {
 		return email;
 	}
 
-	public GridLayout getMemberSticker() {
-		return memberSticker;
-	}
-
-	public void setMemberSticker(GridLayout memberSticker) {
-		this.memberSticker = memberSticker;
-	}
+	// public GridLayout getMemberSticker() {
+	// return memberSticker;
+	// }
+	//
+	// public void setMemberSticker(GridLayout memberSticker) {
+	// this.memberSticker = memberSticker;
+	// }
 
 	public void setEmail(String email) {
 		this.email = email;

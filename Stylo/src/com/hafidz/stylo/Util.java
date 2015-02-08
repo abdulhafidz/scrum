@@ -3,14 +3,12 @@
  */
 package com.hafidz.stylo;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -36,8 +34,8 @@ public class Util {
 	//
 	// }
 
-	public static int toPercentageWidth(Context context, float pixels) {
-		return Math.round(pixels) * 100 / getScreenWidth(context);
+	public static float toPercentageWidth(Context context, float pixels) {
+		return pixels * 100 / getScreenWidth(context);
 	}
 
 	private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
@@ -79,7 +77,7 @@ public class Util {
 	}
 
 	// height is fix!!!
-	public static int toPixelsHeight(Context context, int percentage) {
+	public static float toPixelsHeight(Context context, float percentage) {
 
 		return (percentage) * getScreenHeight(context) / 100;
 
@@ -91,6 +89,10 @@ public class Util {
 
 	public static void hideGarbage() {
 		garbage.setVisibility(View.GONE);
+	}
+
+	public static String generateTaskId() {
+		return UUID.randomUUID().toString();
 	}
 
 }

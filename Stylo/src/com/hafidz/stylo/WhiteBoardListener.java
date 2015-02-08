@@ -1,6 +1,7 @@
 package com.hafidz.stylo;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -22,10 +23,10 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		OnLongClickListener {
 
 	// percentage offset
-	public static int STICKY_X_OFFSET = 8;
-	public static int STICKY_Y_OFFSET = 175;
+	public static final int STICKY_X_OFFSET = 7;
+	public static final int STICKY_Y_OFFSET = 150;
 
-	public static int MEMBER_Y_OFFSET = 38;
+	public static final int MEMBER_Y_OFFSET = 38;
 
 	private float wbTouchX;
 	private float wbTouchY;
@@ -61,73 +62,87 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 			System.out.println("* * * * * long click create member ");
 
 			// //////////
-			RelativeLayout whiteBoardLayout = (RelativeLayout) v;
+			// RelativeLayout whiteBoardLayout = (RelativeLayout) v;
+			//
+			// GridLayout memberLayout = (GridLayout)
+			// LayoutInflater.from(context)
+			// .inflate(R.layout.member_layout, null);
+			//
+			// String memberName = "#" + MemberManager.getAll(context).size();
+			// TextView memberNameView = (TextView) memberLayout
+			// .findViewById(R.id.memberName);
+			// memberNameView.setText(memberName);
+			//
+			// // memberLayout.setHeight(toPixelsHeight(10));
+			// // memberLayout.setWidth(toPixelsWidth(7));
+			//
+			// LayoutParams memberLayoutParams = new LayoutParams(
+			// toPixelsWidth(7), 75);
+			// memberLayout.setLayoutParams(memberLayoutParams);
+			//
+			// memberLayout.setX(toPixelsWidth(2));
+			// memberLayout.setY(wbTouchY - MEMBER_Y_OFFSET);
+			//
+			// MemberListener memberListener = new MemberListener(context);
+			// memberLayout.setOnDragListener(memberListener);
+			// memberLayout.setOnLongClickListener(memberListener);
+			// memberLayout.setOnClickListener(memberListener);
+			//
+			// // bind with id
+			// memberLayout.setTag(memberName);
+			//
+			// whiteBoardLayout.addView(memberLayout);
 
-			GridLayout memberLayout = (GridLayout) LayoutInflater.from(context)
-					.inflate(R.layout.member_layout, null);
-			
-			
-
-			String memberName = "#" + MemberManager.allMembers.size();
-			TextView memberNameView = (TextView) memberLayout
-					.findViewById(R.id.memberName);
-			memberNameView.setText(memberName);
-
-			// memberLayout.setHeight(toPixelsHeight(10));
-			// memberLayout.setWidth(toPixelsWidth(7));
-
-			LayoutParams memberLayoutParams = new LayoutParams(
-					toPixelsWidth(7), 75);
-			memberLayout.setLayoutParams(memberLayoutParams);
-
-			memberLayout.setX(toPixelsWidth(2));
-			memberLayout.setY(wbTouchY - MEMBER_Y_OFFSET);
-
-			MemberListener memberListener = new MemberListener(context);
-			memberLayout.setOnDragListener(memberListener);
-			memberLayout.setOnLongClickListener(memberListener);
-			memberLayout.setOnClickListener(memberListener);
-
-			whiteBoardLayout.addView(memberLayout);
+			String memberName = "#" + MemberManager.getAll(context).size();
+			MemberManager.createNewSticker(context, wbTouchY - MEMBER_Y_OFFSET,
+					memberName);
 
 			// add to the global list of members
-			Member member = new Member(memberName, "", false,
-					memberLayout.getY(), memberLayout);
-			MemberManager.add(member);
-			
-			MemberListener.showEditDialog(context, memberName,true);
+			Member member = new Member(memberName, "", false, wbTouchY
+					- MEMBER_Y_OFFSET);
+			MemberManager.add(context, member);
+
+			MemberListener.showEditDialog(context, memberName, true);
 
 			return true;
 		}
 
 		// new small sticky layout
-		RelativeLayout stickyLayout = (RelativeLayout) LayoutInflater.from(
-				context).inflate(R.layout.sticky_layout_small, null);
-		stickyLayout.setId(Util.generateViewId());
-		stickyLayout.setX(wbTouchX - toPixelsWidth(STICKY_X_OFFSET));
-		stickyLayout.setY(wbTouchY - STICKY_Y_OFFSET);
-		int stickyLayoutPadding = toPixelsWidth(2);
+		String id = Util.generateTaskId();
+		float x = wbTouchX - toPixelsWidth(STICKY_X_OFFSET);
+		float y = wbTouchY - STICKY_Y_OFFSET;
+		TaskManager.createEmptySticker(context, x, y, id);
 
-		stickyLayout.setPadding(stickyLayoutPadding, stickyLayoutPadding,
-				stickyLayoutPadding, stickyLayoutPadding);
+		// RelativeLayout stickyLayout = (RelativeLayout) LayoutInflater.from(
+		// context).inflate(R.layout.sticky_layout_small, null);
+		// stickyLayout.setId(Util.generateViewId());
+		// stickyLayout.setX(wbTouchX - toPixelsWidth(STICKY_X_OFFSET));
+		// stickyLayout.setY(wbTouchY - STICKY_Y_OFFSET);
+		// // int stickyLayoutPadding = toPixelsWidth(1);
+		// //
+		// // stickyLayout.setPadding(stickyLayoutPadding, stickyLayoutPadding,
+		// // stickyLayoutPadding, stickyLayoutPadding);
+		//
+		// // size
+		// RelativeLayout.LayoutParams stickyLayoutParams = new
+		// RelativeLayout.LayoutParams(
+		// toPixelsWidth(14), 300);
+		// stickyLayout.setLayoutParams(stickyLayoutParams);
+		//
+		// // ////////////////////////////////////////
+		//
+		// // add to whiteboard
+		// RelativeLayout whiteBoard = (RelativeLayout) v;
+		// whiteBoard.addView(stickyLayout);
+		//
+		// // add listeners
+		// StickyListener stickyListener = new StickyListener(context);
+		// // stickyLayout.setOnTouchListener(stickyListener);
+		// stickyLayout.setOnDragListener(stickyListener);
+		// stickyLayout.setOnLongClickListener(stickyListener);
+		// stickyLayout.setOnClickListener(stickyListener);
 
-		// size
-		RelativeLayout.LayoutParams stickyLayoutParams = new RelativeLayout.LayoutParams(
-				toPixelsWidth(17), 350);
-		stickyLayout.setLayoutParams(stickyLayoutParams);
-
-		// ////////////////////////////////////////
-
-		// add to whiteboard
-		RelativeLayout whiteBoard = (RelativeLayout) v;
-		whiteBoard.addView(stickyLayout);
-
-		// add listeners
-		StickyListener stickyListener = new StickyListener(context);
-		// stickyLayout.setOnTouchListener(stickyListener);
-		stickyLayout.setOnDragListener(stickyListener);
-		stickyLayout.setOnLongClickListener(stickyListener);
-		stickyLayout.setOnClickListener(stickyListener);
+		// stickyLayout.setTag(id);
 
 		// // TODO : drag terus!!!
 		// View.DragShadowBuilder shadow = new DragShadowBuilder(stickyLayout);
@@ -136,10 +151,13 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 		// update manager (for width we use percentage and for y we use fix
 		// pixels because whiteboard height is fixed)
-		Task task = new Task(stickyLayout.getId(), Util.toPercentageWidth(
-				context, stickyLayout.getX()), stickyLayout.getY(),
-				stickyLayout);
-		TaskManager.add(task);
+		// Task task = new Task(stickyLayout.getId(), Util.toPercentageWidth(
+		// context, stickyLayout.getX()), stickyLayout.getY(),
+		// stickyLayout);
+		// Task task = new Task(id, Util.toPercentageWidth(context,
+		// stickyLayout.getX()), stickyLayout.getY(), stickyLayout);
+		Task task = new Task(id, Util.toPercentageWidth(context, x), y);
+		TaskManager.add(context, task);
 
 		return true;
 	}
@@ -158,10 +176,11 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 				float newY = event.getY() - STICKY_Y_OFFSET;
 
 				// update manager
-				TaskManager.obtainLock(task.getId());
-				TaskManager.moved(task.getId(),
+				String id = (String) task.getTag();
+				TaskManager.obtainLock(id);
+				TaskManager.moved(context, id,
 						Util.toPercentageWidth(context, newX), newY);
-				TaskManager.releaseLock(task.getId());
+				TaskManager.releaseLock(id);
 
 				System.out.println("* * * * * drag dropped on whiteboard : "
 						+ task.getId());
@@ -181,7 +200,7 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 				GridLayout memberText = (GridLayout) event.getLocalState();
 
-				if (event.getX() <= toPixelsWidth(10) && event.getY() > 52) {
+				if (event.getX() <= toPixelsWidth(10) && event.getY() > 70) {
 
 					// new member location
 					memberText.setX(toPixelsWidth(2));
@@ -193,6 +212,9 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 					System.out
 							.println("* * * * * non sticky dropped on member section");
+
+					MemberManager.moved(context, (String) memberText.getTag(),
+							event.getY() - MEMBER_Y_OFFSET);
 
 					return true;
 				} else {
