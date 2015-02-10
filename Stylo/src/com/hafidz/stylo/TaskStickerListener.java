@@ -52,11 +52,12 @@ public class TaskStickerListener implements OnDragListener,
 					String newOwner = memberNameTV.getText().toString();
 
 					// update task manager
-					String id = (String) taskSticker.getTag();
-					TaskManager.obtainLock(id);
-					TaskManager.assignOwner(context, id,
+					String taskId = (String) taskSticker.getTag();
+					TaskManager.obtainLock(taskId);
+					TaskManager.assignOwner(context,
+							TaskManager.load(context, taskId),
 							MemberManager.load(context, newOwner));
-					TaskManager.releaseLock(id);
+					TaskManager.releaseLock(taskId);
 
 					System.out.println("* * * * * member " + newOwner
 							+ " dropped to task");

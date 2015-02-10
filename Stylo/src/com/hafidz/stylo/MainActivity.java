@@ -11,13 +11,22 @@ import com.parse.Parse;
 import com.parse.ParseException;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.RelativeLayout.LayoutParams;
@@ -36,9 +45,13 @@ import android.widget.TextView;
  */
 public class MainActivity extends Activity {
 
+	private View mainActivityLayout;
 	private WhiteBoardScroller whiteBoardScroller;
 	private RelativeLayout whiteBoardLayout;
-	private WhiteboardView whiteboardView;
+	// private WhiteboardView whiteboardView;
+
+	private DrawerLayout drawerLayout;
+	private ListView drawerList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +62,17 @@ public class MainActivity extends Activity {
 		Parse.initialize(this, "rvL9mFoct6KVwjvIfTCV23qRwKBKlcwPrwPVpvPI",
 				"dPxpmhhE7ceXzKwGDpkdWBqWKh7IyWIaJJpd7yJl");
 
-		// setContentView(R.layout.activity_main);
-		whiteboardView = new WhiteboardView(getApplicationContext());
-		whiteboardView.setBackgroundColor(Color.parseColor("#F5F5F5"));
-		setContentView(whiteboardView);
+		mainActivityLayout = LayoutInflater.from(getApplicationContext())
+				.inflate(R.layout.activity_main, null);
+		setContentView(mainActivityLayout);
+
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
+		drawerList = (ListView) findViewById(R.id.drawerList);
+		ArrayAdapter<String> drawerAdapter = new ArrayAdapter<String>(
+				getApplicationContext(), android.R.layout.simple_list_item_1,
+				new String[] { "Refresh" });
+		drawerList.setAdapter(drawerAdapter);
+		drawerList.setOnItemClickListener(new DrawerItemListener(this,drawerLayout));
 
 		// init widgets
 		// whiteBoardLayout = (RelativeLayout) findViewById(R.id.whiteBoard);
@@ -78,8 +98,7 @@ public class MainActivity extends Activity {
 		// hide default sticky
 		// findViewById(R.id.defaultSticky).setVisibility(View.GONE);
 
-		// whiteboardView.addView(whiteBoardLayout);
-		whiteboardView.addView(whiteBoardScroller);
+		// whiteboardView.addView(whiteBoardScroller);
 
 		// garbage can
 		ImageView garbage = new ImageView(getApplicationContext());
@@ -90,12 +109,17 @@ public class MainActivity extends Activity {
 		GarbageListener garbageListener = new GarbageListener(
 				getApplicationContext());
 		garbage.setOnDragListener(garbageListener);
-		whiteboardView.addView(garbage);
+		// whiteboardView.addView(garbage);
 		Util.garbage = garbage;
 		Util.hideGarbage();
 
 		// add whiteboard to Util for easy access
 		Util.whiteboardLayout = whiteBoardLayout;
+
+		// add to main layout
+		FrameLayout mainLayout = (FrameLayout) findViewById(R.id.drawerMainContent);
+		mainLayout.addView(whiteBoardScroller);
+		mainLayout.addView(garbage);
 
 	}
 
@@ -103,7 +127,7 @@ public class MainActivity extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if (hasFocus) {
-			whiteboardView
+			mainActivityLayout
 					.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 							| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 							| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -120,6 +144,11 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		reloadStickers();
+	}
+
+	public void reloadStickers() {
 
 		// clear all sticker
 		Util.whiteboardLayout.removeAllViews();
@@ -153,11 +182,72 @@ public class MainActivity extends Activity {
 		doneText.setPaddingRelative(toPixelsWidth(82), textTop, 0, textTop);
 		whiteBoardLayout.addView(doneText);
 
-		try {
-			// load members from db
-			Map<String, Member> members = MemberManager
-					.getAll(getApplicationContext());
+		ProgressDialog progress = new ProgressDialog(this);
+		// progress.setTitle("Loading");
+		progress.setMessage("Loading from server...");
+		progress.show();
 
+		// load stickers on another thread
+		new Thread(new StickerLoader(progress)).start();
+	}
+
+	@Override
+	public Context getApplicationContext() {
+
+		return this;
+	}
+
+	private class StickerLoader implements Runnable {
+		private ProgressDialog progress;
+
+		public StickerLoader(ProgressDialog progress) {
+			this.progress = progress;
+		}
+
+		@Override
+		public void run() {
+			Activity activity = (Activity) getApplicationContext();
+			try {
+				// load stickers from db
+				Map<String, Member> members = MemberManager
+						.getAll(getApplicationContext());
+				Map<String, Task> tasks = TaskManager
+						.getAll(getApplicationContext());
+
+				activity.runOnUiThread(new StickerLoaderUI(members, tasks,
+						progress));
+
+			} catch (ParseException e1) {
+				activity.runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						progress.dismiss();
+						Util.showError(getApplicationContext(),
+								"Problem loading sticker(s) from server.");
+					}
+				});
+
+			}
+
+		}
+	}
+
+	private class StickerLoaderUI implements Runnable {
+
+		private Map<String, Member> members;
+		private Map<String, Task> tasks;
+		private ProgressDialog progress;
+
+		public StickerLoaderUI(Map<String, Member> members,
+				Map<String, Task> tasks, ProgressDialog progress) {
+			this.members = members;
+			this.tasks = tasks;
+			this.progress = progress;
+		}
+
+		@Override
+		public void run() {
 			// add member stickers to whiteboard
 			for (Entry<String, Member> entry : members.entrySet()) {
 				Member member = entry.getValue();
@@ -165,28 +255,7 @@ public class MainActivity extends Activity {
 				MemberManager.createNewSticker(getApplicationContext(),
 						member.getPosY(), member.getName());
 
-				System.out.println("member.getName() -> " + member.getName());
-
 			}
-
-			Toast.makeText(getApplicationContext(), "All member(s) loaded.",
-					Toast.LENGTH_SHORT).show();
-
-		} catch (ParseException e1) {
-			Util.showError(getApplicationContext(),
-					"Problem getting member(s) from server.");
-		}
-
-		try {
-			// load tasks from db
-			System.out
-					.println("loading tasksssss = = = = ======================== = = =  11111");
-			Map<String, Task> tasks = TaskManager
-					.getAll(getApplicationContext());
-			System.out
-					.println("loading taskssss = = = = ======================== = = =  22222");
-
-			System.out.println(tasks.size());
 
 			// add tasks stickers to whiteboard
 			for (Entry<String, Task> entry : tasks.entrySet()) {
@@ -209,19 +278,12 @@ public class MainActivity extends Activity {
 
 			}
 
-			// toast!
-			Toast.makeText(getApplicationContext(), "All tasks(s) loaded.",
+			progress.dismiss();
+
+			Toast.makeText(getApplicationContext(), "Welcome!",
 					Toast.LENGTH_SHORT).show();
-		} catch (ParseException e) {
-			e.printStackTrace();
-			Util.showError(this.getApplicationContext(),
-					"Problem getting task(s) from server.");
+
 		}
-	}
 
-	@Override
-	public Context getApplicationContext() {
-
-		return this;
 	}
 }

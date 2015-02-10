@@ -49,10 +49,10 @@ public class TaskManager {
 		saveToDB(context, task);
 	}
 
-	public static void assignOwner(Context context, String taskId, Member owner)
+	public static void assignOwner(Context context, Task task, Member owner)
 			throws ParseException {
 
-		updateToDB(context, taskId, owner.getName());
+		updateToDB(context, task, owner.getName());
 
 		Toast.makeText(context, owner.getName() + " assigned to a task.",
 				Toast.LENGTH_SHORT).show();
@@ -97,11 +97,11 @@ public class TaskManager {
 	public static void releaseLock(String taskId) {
 	}
 
-	public static void moved(Context context, String taskId, float x, float y)
+	public static void moved(Context context, Task task, float x, float y)
 			throws ParseException {
 
 		// update status
-		Task task = load(context, taskId);
+		// Task task = load(context, taskId);
 		if (x >= (WhiteBoardScroller.LINE_IN_PROGRESS - WhiteBoardListener.STICKY_X_OFFSET)
 				&& x < (WhiteBoardScroller.LINE_DONE - WhiteBoardListener.STICKY_X_OFFSET)) {
 			task.setStatus(Task.STATUS_IN_PROGRESS);
@@ -122,10 +122,10 @@ public class TaskManager {
 					.show();
 		}
 
-		updateToDB(context, taskId, x, y, task.getStatus());
+		updateToDB(context, task, x, y, task.getStatus());
 	}
 
-	public static void updateTask(Context context, String taskId, String title,
+	public static void updateTask(Context context, Task task, String title,
 			String desc, RelativeLayout sticker) throws ParseException {
 		// Task task = allTasks.get(taskId);
 		// task.setTitle(title);
@@ -138,7 +138,7 @@ public class TaskManager {
 
 		// update ui (big view task)
 
-		updateToDB(context, taskId, title, desc);
+		updateToDB(context, task, title, desc);
 
 	}
 
@@ -158,22 +158,14 @@ public class TaskManager {
 
 	}
 
-	public static void remove(Context context, String taskId,
-			RelativeLayout sticker) throws ParseException {
-		Task task = load(context, taskId);
-
-		String id = task.getId();
+	public static void remove(Context context, Task task, RelativeLayout sticker)
+			throws ParseException {
 
 		freeOwner(context, task, sticker);
 
-		// RelativeLayout sticker = task.getSmallTask();
-
-		// sticker.setVisibility(View.GONE);
 		Util.whiteboardLayout.removeView(sticker);
 
-		// allTasks.remove(taskId);
-
-		deleteFromDB(context, id);
+		deleteFromDB(context, task);
 
 		Toast.makeText(context, "Task removed.", Toast.LENGTH_SHORT).show();
 	}
@@ -190,7 +182,7 @@ public class TaskManager {
 		if (member != null) {
 
 			task.setOwner(null);
-			updateToDB(context, task.getId(), null);
+			updateToDB(context, task, null);
 
 			String name = member.getName();
 
@@ -212,7 +204,7 @@ public class TaskManager {
 
 		Member member = task.getOwner();
 		if (member != null) {
-			updateToDB(context, task.getId(), null);
+			updateToDB(context, task, null);
 
 			String name = task.getOwner().getName();
 			// GridLayout memberSticker = member.getMemberSticker();
@@ -295,8 +287,8 @@ public class TaskManager {
 	//
 	// }
 
-	private static void updateToDB(Context context, String taskId,
-			String newOwner) throws ParseException {
+	private static void updateToDB(Context context, Task task, String newOwner)
+			throws ParseException {
 
 		// TaskDB taskDB = new TaskDB(context);
 		//
@@ -312,8 +304,6 @@ public class TaskManager {
 		// int count = db.update(TaskDB.TABLE_NAME, values, selection,
 		// selectionArgs);
 
-		Task task = load(context, taskId);
-
 		ParseObject parseObject = task.getParseObject();
 
 		// TODO : sync or lock before updating
@@ -326,7 +316,7 @@ public class TaskManager {
 
 	}
 
-	private static void updateToDB(Context context, String taskId, float posX,
+	private static void updateToDB(Context context, Task task, float posX,
 			float posY, int status) throws ParseException {
 
 		// TaskDB taskDB = new TaskDB(context);
@@ -345,8 +335,6 @@ public class TaskManager {
 		// int count = db.update(TaskDB.TABLE_NAME, values, selection,
 		// selectionArgs);
 
-		Task task = load(context, taskId);
-
 		ParseObject parseObject = task.getParseObject();
 
 		// TODO : sync or lock before updating
@@ -358,7 +346,7 @@ public class TaskManager {
 
 	}
 
-	private static void updateToDB(Context context, String id, String title,
+	private static void updateToDB(Context context, Task task, String title,
 			String desc) throws ParseException {
 
 		// TaskDB taskDB = new TaskDB(context);
@@ -377,8 +365,6 @@ public class TaskManager {
 		// int count = db.update(TaskDB.TABLE_NAME, values, selection,
 		// selectionArgs);
 
-		Task task = load(context, id);
-
 		ParseObject parseObject = task.getParseObject();
 
 		// TODO : sync or lock before updating
@@ -389,7 +375,7 @@ public class TaskManager {
 
 	}
 
-	private static void deleteFromDB(Context context, String taskId)
+	private static void deleteFromDB(Context context, Task task)
 			throws ParseException {
 		// TaskDB taskDB = new TaskDB(context);
 		//
@@ -403,7 +389,7 @@ public class TaskManager {
 		// db.delete(TaskDB.TABLE_NAME, selection, selectionArgs);
 
 		// TODO : lock first or sync
-		load(context, taskId).getParseObject().delete();
+		task.getParseObject().delete();
 	}
 
 	private static Map<String, Task> getAllFromDB(Context context)

@@ -122,12 +122,13 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 				float newY = event.getY() - STICKY_Y_OFFSET;
 
 				// update manager
-				String id = (String) task.getTag();
-				TaskManager.obtainLock(id);
+				String taskId = (String) task.getTag();
+				TaskManager.obtainLock(taskId);
 				try {
-					TaskManager.moved(context, id,
+					TaskManager.moved(context,
+							TaskManager.load(context, taskId),
 							Util.toPercentageWidth(context, newX), newY);
-					TaskManager.releaseLock(id);
+					TaskManager.releaseLock(taskId);
 
 					System.out
 							.println("* * * * * drag dropped on whiteboard : "

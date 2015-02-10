@@ -79,14 +79,14 @@ public class GarbageListener implements OnDragListener {
 
 				RelativeLayout task = (RelativeLayout) event.getLocalState();
 
-				String id = (String) task.getTag();
+				String taskId = (String) task.getTag();
 
 				try {
-					TaskManager.obtainLock(id);
-					TaskManager.remove(context, id,
-							(RelativeLayout) Util.whiteboardLayout
-									.findViewWithTag(id));
-					TaskManager.releaseLock(id);
+					TaskManager.obtainLock(taskId);
+					TaskManager.remove(context, TaskManager.load(context,
+							taskId), (RelativeLayout) Util.whiteboardLayout
+							.findViewWithTag(taskId));
+					TaskManager.releaseLock(taskId);
 				} catch (ParseException e) {
 					Util.showError(context, "Problem updating server.");
 				}

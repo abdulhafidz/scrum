@@ -114,9 +114,10 @@ public class TaskEditListener implements OnClickListener {
 		try {
 			// update manager
 			TaskManager.obtainLock(taskId);
-			TaskManager.updateTask(context, taskId, editTitle.getText().toString(),
-					editDesc.getText().toString(),
-					(RelativeLayout) Util.whiteboardLayout.findViewWithTag(taskId));
+			TaskManager.updateTask(context, TaskManager.load(context, taskId),
+					editTitle.getText().toString(), editDesc.getText()
+							.toString(), (RelativeLayout) Util.whiteboardLayout
+							.findViewWithTag(taskId));
 			TaskManager.releaseLock(taskId);
 
 			editDialog.dismiss();
