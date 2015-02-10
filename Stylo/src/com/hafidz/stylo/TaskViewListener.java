@@ -5,6 +5,7 @@ package com.hafidz.stylo;
 
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
+import com.parse.ParseException;
 
 import android.content.Context;
 import android.view.DragEvent;
@@ -39,7 +40,13 @@ public class TaskViewListener implements OnDragListener {
 				owner.setVisibility(View.VISIBLE);
 			} else {
 
-				TaskManager.freeOwner(context, task);
+				try {
+					TaskManager.freeOwner(context, task);
+				} catch (ParseException e) {
+					View owner = (View) event.getLocalState();
+					owner.setVisibility(View.VISIBLE);
+					Util.showError(context, "Problem updating the server.");
+				}
 
 			}
 			return true;

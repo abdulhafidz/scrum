@@ -1,5 +1,6 @@
 package com.hafidz.stylo;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
@@ -18,6 +19,7 @@ import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
+import com.parse.ParseException;
 
 public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		OnLongClickListener {
@@ -59,105 +61,49 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		// create member
 		if (wbTouchX <= toPixelsWidth(10)) {
 
-			System.out.println("* * * * * long click create member ");
+			try {
+				System.out.println("* * * * * long click create member ");
 
-			// //////////
-			// RelativeLayout whiteBoardLayout = (RelativeLayout) v;
-			//
-			// GridLayout memberLayout = (GridLayout)
-			// LayoutInflater.from(context)
-			// .inflate(R.layout.member_layout, null);
-			//
-			// String memberName = "#" + MemberManager.getAll(context).size();
-			// TextView memberNameView = (TextView) memberLayout
-			// .findViewById(R.id.memberName);
-			// memberNameView.setText(memberName);
-			//
-			// // memberLayout.setHeight(toPixelsHeight(10));
-			// // memberLayout.setWidth(toPixelsWidth(7));
-			//
-			// LayoutParams memberLayoutParams = new LayoutParams(
-			// toPixelsWidth(7), 75);
-			// memberLayout.setLayoutParams(memberLayoutParams);
-			//
-			// memberLayout.setX(toPixelsWidth(2));
-			// memberLayout.setY(wbTouchY - MEMBER_Y_OFFSET);
-			//
-			// MemberListener memberListener = new MemberListener(context);
-			// memberLayout.setOnDragListener(memberListener);
-			// memberLayout.setOnLongClickListener(memberListener);
-			// memberLayout.setOnClickListener(memberListener);
-			//
-			// // bind with id
-			// memberLayout.setTag(memberName);
-			//
-			// whiteBoardLayout.addView(memberLayout);
+				String memberName = "#" + MemberManager.getAll(context).size();
 
-			String memberName = "#" + MemberManager.getAll(context).size();
-			MemberManager.createNewSticker(context, wbTouchY - MEMBER_Y_OFFSET,
-					memberName);
+				// add to the global list of members
+				Member member = new Member(memberName, "", false, wbTouchY
+						- MEMBER_Y_OFFSET, null);
+				MemberManager.add(context, member);
 
-			// add to the global list of members
-			Member member = new Member(memberName, "", false, wbTouchY
-					- MEMBER_Y_OFFSET);
-			MemberManager.add(context, member);
+				MemberManager.createNewSticker(context, wbTouchY
+						- MEMBER_Y_OFFSET, memberName);
 
-			MemberListener.showEditDialog(context, memberName, true);
+				MemberListener.showEditDialog(context, memberName, true);
 
-			return true;
+				return true;
+			} catch (ParseException e) {
+				Util.showError(context, "Problem updating server.");
+			}
 		}
 
-		// new small sticky layout
-		String id = Util.generateTaskId();
-		float x = wbTouchX - toPixelsWidth(STICKY_X_OFFSET);
-		float y = wbTouchY - STICKY_Y_OFFSET;
-		TaskManager.createEmptySticker(context, x, y, id);
+		// ProgressDialog progress = new ProgressDialog(context);
+		try {
 
-		// RelativeLayout stickyLayout = (RelativeLayout) LayoutInflater.from(
-		// context).inflate(R.layout.sticky_layout_small, null);
-		// stickyLayout.setId(Util.generateViewId());
-		// stickyLayout.setX(wbTouchX - toPixelsWidth(STICKY_X_OFFSET));
-		// stickyLayout.setY(wbTouchY - STICKY_Y_OFFSET);
-		// // int stickyLayoutPadding = toPixelsWidth(1);
-		// //
-		// // stickyLayout.setPadding(stickyLayoutPadding, stickyLayoutPadding,
-		// // stickyLayoutPadding, stickyLayoutPadding);
-		//
-		// // size
-		// RelativeLayout.LayoutParams stickyLayoutParams = new
-		// RelativeLayout.LayoutParams(
-		// toPixelsWidth(14), 300);
-		// stickyLayout.setLayoutParams(stickyLayoutParams);
-		//
-		// // ////////////////////////////////////////
-		//
-		// // add to whiteboard
-		// RelativeLayout whiteBoard = (RelativeLayout) v;
-		// whiteBoard.addView(stickyLayout);
-		//
-		// // add listeners
-		// StickyListener stickyListener = new StickyListener(context);
-		// // stickyLayout.setOnTouchListener(stickyListener);
-		// stickyLayout.setOnDragListener(stickyListener);
-		// stickyLayout.setOnLongClickListener(stickyListener);
-		// stickyLayout.setOnClickListener(stickyListener);
+			// progress.setTitle("Loading");
+			// progress.setMessage("Wait while loading...");
+			// progress.show();
 
-		// stickyLayout.setTag(id);
+			// new small sticky layout
+			String id = Util.generateTaskId();
+			float x = wbTouchX - toPixelsWidth(STICKY_X_OFFSET);
+			float y = wbTouchY - STICKY_Y_OFFSET;
 
-		// // TODO : drag terus!!!
-		// View.DragShadowBuilder shadow = new DragShadowBuilder(stickyLayout);
-		// stickyLayout.startDrag(null, shadow, stickyLayout, 0);
-		// //stickyLayout.setVisibility(View.INVISIBLE);
+			Task task = new Task(id, Util.toPercentageWidth(context, x), y,
+					null);
+			TaskManager.add(context, task);
 
-		// update manager (for width we use percentage and for y we use fix
-		// pixels because whiteboard height is fixed)
-		// Task task = new Task(stickyLayout.getId(), Util.toPercentageWidth(
-		// context, stickyLayout.getX()), stickyLayout.getY(),
-		// stickyLayout);
-		// Task task = new Task(id, Util.toPercentageWidth(context,
-		// stickyLayout.getX()), stickyLayout.getY(), stickyLayout);
-		Task task = new Task(id, Util.toPercentageWidth(context, x), y);
-		TaskManager.add(context, task);
+			TaskManager.createEmptySticker(context, x, y, id);
+		} catch (ParseException e) {
+			Util.showError(context, "Problem updating to the server.");
+		} finally {
+			// progress.dismiss();
+		}
 
 		return true;
 	}
@@ -178,22 +124,26 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 				// update manager
 				String id = (String) task.getTag();
 				TaskManager.obtainLock(id);
-				TaskManager.moved(context, id,
-						Util.toPercentageWidth(context, newX), newY);
-				TaskManager.releaseLock(id);
+				try {
+					TaskManager.moved(context, id,
+							Util.toPercentageWidth(context, newX), newY);
+					TaskManager.releaseLock(id);
 
-				System.out.println("* * * * * drag dropped on whiteboard : "
-						+ task.getId());
+					System.out
+							.println("* * * * * drag dropped on whiteboard : "
+									+ task.getId());
 
-				// set post-it to new position
-				task.setX(event.getX() - toPixelsWidth(STICKY_X_OFFSET));
-				task.setY(event.getY() - STICKY_Y_OFFSET);
+					// set post-it to new position
+					task.setX(event.getX() - toPixelsWidth(STICKY_X_OFFSET));
+					task.setY(event.getY() - STICKY_Y_OFFSET);
 
-				// bring to front
-				task.bringToFront();
+					// bring to front
+					task.bringToFront();
+				} catch (ParseException e) {
+					task.setVisibility(View.VISIBLE);
+					Util.showError(context, "Problem updating server.");
+				}
 
-				// and make it visible
-				// postIt.setVisibility(View.VISIBLE);
 			}
 			/* member dropped */
 			else {
@@ -202,21 +152,26 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 				if (event.getX() <= toPixelsWidth(10) && event.getY() > 70) {
 
-					// new member location
-					memberText.setX(toPixelsWidth(2));
-					memberText.setY(event.getY() - MEMBER_Y_OFFSET);
+					try {
+						MemberManager.moved(context,
+								(String) memberText.getTag(), event.getY()
+										- MEMBER_Y_OFFSET);
 
-					memberText.bringToFront();
+						// new member location
+						memberText.setX(toPixelsWidth(1));
+						memberText.setY(event.getY() - MEMBER_Y_OFFSET);
 
-					memberText.setVisibility(View.VISIBLE);
+						memberText.bringToFront();
 
-					System.out
-							.println("* * * * * non sticky dropped on member section");
+						memberText.setVisibility(View.VISIBLE);
 
-					MemberManager.moved(context, (String) memberText.getTag(),
-							event.getY() - MEMBER_Y_OFFSET);
+						System.out
+								.println("* * * * * non sticky dropped on member section");
 
-					return true;
+						return true;
+					} catch (ParseException e) {
+						Util.showError(context, "Problem updating server.");
+					}
 				} else {
 					System.out
 							.println("* * * * * non sticky dropped on whiteboard");

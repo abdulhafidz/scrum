@@ -13,6 +13,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.hafidz.stylo.model.TaskManager;
+import com.parse.ParseException;
 
 /**
  * @author hafidz
@@ -110,14 +111,18 @@ public class TaskEditListener implements OnClickListener {
 
 		taskDetailDesc.setText(editDesc.getText());
 
-		// update manager
-		TaskManager.obtainLock(taskId);
-		TaskManager.updateTask(context, taskId, editTitle.getText().toString(),
-				editDesc.getText().toString(),
-				(RelativeLayout) Util.whiteboardLayout.findViewWithTag(taskId));
-		TaskManager.releaseLock(taskId);
+		try {
+			// update manager
+			TaskManager.obtainLock(taskId);
+			TaskManager.updateTask(context, taskId, editTitle.getText().toString(),
+					editDesc.getText().toString(),
+					(RelativeLayout) Util.whiteboardLayout.findViewWithTag(taskId));
+			TaskManager.releaseLock(taskId);
 
-		editDialog.dismiss();
+			editDialog.dismiss();
+		} catch (ParseException e) {
+			Util.showError(context, "Problem updating the server.");
+		}
 
 	}
 }

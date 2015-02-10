@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 /**
  * @author johariab
@@ -93,6 +94,15 @@ public class Util {
 
 	public static String generateTaskId() {
 		return UUID.randomUUID().toString();
+	}
+
+	public static String getActiveBoard() {
+		//return "abdulhafidz@gmail.com";
+		return "ETHAN@HP";
+	}
+
+	public static void showError(Context context, String msg) {
+		Toast.makeText(context, msg, Toast.LENGTH_SHORT);
 	}
 
 }

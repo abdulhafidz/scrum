@@ -7,6 +7,8 @@ import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
+import com.parse.Parse;
+import com.parse.ParseException;
 
 import android.app.Activity;
 import android.content.Context;
@@ -41,6 +43,11 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// Enable Local Datastore.
+		Parse.enableLocalDatastore(this);
+		Parse.initialize(this, "rvL9mFoct6KVwjvIfTCV23qRwKBKlcwPrwPVpvPI",
+				"dPxpmhhE7ceXzKwGDpkdWBqWKh7IyWIaJJpd7yJl");
 
 		// setContentView(R.layout.activity_main);
 		whiteboardView = new WhiteboardView(getApplicationContext());
@@ -79,7 +86,7 @@ public class MainActivity extends Activity {
 		garbage.setImageResource(android.R.drawable.ic_menu_delete);
 		garbage.setX(toPixelsWidth(88));
 		garbage.setY(Util.toPixelsHeight(getApplicationContext(), 80));
-		garbage.setLayoutParams(new LayoutParams(150, 150));
+		garbage.setLayoutParams(new LayoutParams(100, 100));
 		GarbageListener garbageListener = new GarbageListener(
 				getApplicationContext());
 		garbage.setOnDragListener(garbageListener);
@@ -146,51 +153,70 @@ public class MainActivity extends Activity {
 		doneText.setPaddingRelative(toPixelsWidth(82), textTop, 0, textTop);
 		whiteBoardLayout.addView(doneText);
 
-		// load members from db
-		Map<String, Member> members = MemberManager
-				.getAll(getApplicationContext());
+		try {
+			// load members from db
+			Map<String, Member> members = MemberManager
+					.getAll(getApplicationContext());
 
-		System.out.println("members.size() - - - - - > >> > > " + members.size());
-		
-		// add member stickers to whiteboard
-		for (Entry<String, Member> entry : members.entrySet()) {
-			Member member = entry.getValue();
+			// add member stickers to whiteboard
+			for (Entry<String, Member> entry : members.entrySet()) {
+				Member member = entry.getValue();
 
-			MemberManager.createNewSticker(getApplicationContext(),
-					member.getPosY(), member.getName());
-			
-			System.out.println("member.getName() -> " + member.getName());
+				MemberManager.createNewSticker(getApplicationContext(),
+						member.getPosY(), member.getName());
 
-		}
+				System.out.println("member.getName() -> " + member.getName());
 
-		// load tasks from db
-		Map<String, Task> tasks = TaskManager.getAll(getApplicationContext());
-
-		// add tasks stickers to whiteboard
-		for (Entry<String, Task> entry : tasks.entrySet()) {
-			Task task = entry.getValue();
-			RelativeLayout sticker = TaskManager.createEmptySticker(
-					getApplicationContext(),
-					Util.toPixelsWidth(getApplicationContext(),
-							Math.round(task.getPosX())), task.getPosY(),
-					task.getId());
-			TaskManager.updateSticker(sticker, task.getTitle(),
-					task.getDescription());
-			if (task.getOwner() != null) {
-				TaskManager.updateStickerOwner(sticker, task.getOwner()
-						.getName(), null);
-
-				// remove from members pool
-				Util.whiteboardLayout
-						.findViewWithTag(task.getOwner().getName())
-						.setVisibility(View.GONE);
 			}
 
+			Toast.makeText(getApplicationContext(), "All member(s) loaded.",
+					Toast.LENGTH_SHORT).show();
+
+		} catch (ParseException e1) {
+			Util.showError(getApplicationContext(),
+					"Problem getting member(s) from server.");
 		}
 
-		// toast!
-		Toast.makeText(getApplicationContext(), "All sticker(s) loaded.",
-				Toast.LENGTH_SHORT).show();
+		try {
+			// load tasks from db
+			System.out
+					.println("loading tasksssss = = = = ======================== = = =  11111");
+			Map<String, Task> tasks = TaskManager
+					.getAll(getApplicationContext());
+			System.out
+					.println("loading taskssss = = = = ======================== = = =  22222");
+
+			System.out.println(tasks.size());
+
+			// add tasks stickers to whiteboard
+			for (Entry<String, Task> entry : tasks.entrySet()) {
+				Task task = entry.getValue();
+				RelativeLayout sticker = TaskManager.createEmptySticker(
+						getApplicationContext(),
+						Util.toPixelsWidth(getApplicationContext(),
+								Math.round(task.getPosX())), task.getPosY(),
+						task.getId());
+				TaskManager.updateSticker(sticker, task.getTitle(),
+						task.getDescription());
+				if (task.getOwner() != null) {
+					TaskManager.updateStickerOwner(sticker, task.getOwner()
+							.getName(), null);
+
+					// remove from members pool
+					Util.whiteboardLayout.findViewWithTag(
+							task.getOwner().getName()).setVisibility(View.GONE);
+				}
+
+			}
+
+			// toast!
+			Toast.makeText(getApplicationContext(), "All tasks(s) loaded.",
+					Toast.LENGTH_SHORT).show();
+		} catch (ParseException e) {
+			e.printStackTrace();
+			Util.showError(this.getApplicationContext(),
+					"Problem getting task(s) from server.");
+		}
 	}
 
 	@Override

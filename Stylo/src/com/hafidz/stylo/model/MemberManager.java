@@ -4,25 +4,23 @@
 package com.hafidz.stylo.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.GridLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hafidz.stylo.MemberListener;
 import com.hafidz.stylo.R;
 import com.hafidz.stylo.Util;
-import com.hafidz.stylo.sql.MemberDB;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 /**
  * @author hafidz
@@ -32,20 +30,16 @@ public class MemberManager {
 	// public static Map<String, Member> allMembers = new HashMap<String,
 	// Member>();
 
-	public static Map<String, Member> getAll(Context context) {
+	public static Map<String, Member> getAll(Context context)
+			throws ParseException {
 		return getAllFromDB(context);
 	}
 
-	public static void add(Context context, Member member) {
-		// TODO : server side add task
-		// allMembers.put(task.getName(), task);
+	public static void add(Context context, Member member)
+			throws ParseException {
 
 		saveToDB(context, member);
 	}
-
-	// TODO : lock task
-
-	// TODO : unlock task
 
 	public static boolean obtainLock(String taskId) {
 		// TODO : implement obtain lock
@@ -55,31 +49,29 @@ public class MemberManager {
 	public static void releaseLock(String taskId) {
 	}
 
-	public static void moved(Context context, String memberName, float y) {
-		// TODO : server side
+	public static void moved(Context context, String memberName, float y)
+			throws ParseException {
 
-		// TODO : update status as well based on position
-
-		// allMembers.get(String.valueOf(taskId)).setPosY(y);
 		updateToDB(context, memberName, y);
 	}
 
-	public static Member load(Context context, String name) {
-		// return allMembers.get(name);
+	public static Member load(Context context, String name)
+			throws ParseException {
 		return loadFromDB(context, name);
 	}
 
-	public static void remove(Context context, String name) {
-		Util.whiteboardLayout.findViewWithTag(name).setVisibility(View.GONE);
+	public static void remove(Context context, String name)
+			throws ParseException {
 
-		// allMembers.remove(name);
 		deleteFromDB(context, name);
+
+		Util.whiteboardLayout.findViewWithTag(name).setVisibility(View.GONE);
 
 		Toast.makeText(context, name + " removed.", Toast.LENGTH_SHORT).show();
 	}
 
 	public static void updateMember(Context context, String oriName,
-			String newName, String email) {
+			String newName, String email) throws ParseException {
 
 		Member member = load(context, oriName);
 
@@ -91,7 +83,7 @@ public class MemberManager {
 		// id changed
 		else {
 			Member newMember = new Member(newName, email, false,
-					member.getPosY());
+					member.getPosY(), null);
 			add(context, newMember);
 
 			// // reassign task to new member
@@ -123,141 +115,197 @@ public class MemberManager {
 
 	}
 
-	private static void saveToDB(Context context, Member member) {
+	private static void saveToDB(Context context, Member task)
+			throws ParseException {
 
-		MemberDB memberDB = new MemberDB(context);
+		// MemberDB memberDB = new MemberDB(context);
+		//
+		// SQLiteDatabase db = memberDB.getWritableDatabase();
+		//
+		// ContentValues values = new ContentValues();
+		// values.put("NAME", member.getName());
+		// values.put("EMAIL", member.getEmail());
+		// values.put("POS_Y", member.getPosY());
+		//
+		// long newRowId;
+		// newRowId = db.insert(MemberDB.TABLE_NAME, null, values);
 
-		SQLiteDatabase db = memberDB.getWritableDatabase();
+		// push to server
+		ParseObject testObject = new ParseObject("Member");
+		testObject.put("board", Util.getActiveBoard());
+		testObject.put("name", task.getName());
+		if (task.getEmail() != null)
+			testObject.put("email", task.getEmail());
 
-		ContentValues values = new ContentValues();
-		values.put("NAME", member.getName());
-		values.put("EMAIL", member.getEmail());
-		values.put("POS_Y", member.getPosY());
+		testObject.put("posY", task.getPosY());
 
-		long newRowId;
-		newRowId = db.insert(MemberDB.TABLE_NAME, null, values);
-
-	}
-
-	private static void updateToDB(Context context, String memberName,
-			String email) {
-
-		MemberDB memberDB = new MemberDB(context);
-		SQLiteDatabase db = memberDB.getWritableDatabase();
-
-		ContentValues values = new ContentValues();
-		values.put("EMAIL", email);
-
-		// Which row to update, based on the ID
-		String selection = "NAME LIKE ?";
-		String[] selectionArgs = { memberName };
-
-		int count = db.update(MemberDB.TABLE_NAME, values, selection,
-				selectionArgs);
+		testObject.save();
 
 	}
 
 	private static void updateToDB(Context context, String memberName,
-			float posY) {
+			String email) throws ParseException {
 
-		MemberDB memberDB = new MemberDB(context);
-		SQLiteDatabase db = memberDB.getWritableDatabase();
+		// MemberDB memberDB = new MemberDB(context);
+		// SQLiteDatabase db = memberDB.getWritableDatabase();
+		//
+		// ContentValues values = new ContentValues();
+		// values.put("EMAIL", email);
+		//
+		// // Which row to update, based on the ID
+		// String selection = "NAME LIKE ?";
+		// String[] selectionArgs = { memberName };
+		//
+		// int count = db.update(MemberDB.TABLE_NAME, values, selection,
+		// selectionArgs);
 
-		ContentValues values = new ContentValues();
-		values.put("POS_Y", posY);
+		Member member = load(context, memberName);
 
-		// Which row to update, based on the ID
-		String selection = "NAME LIKE ?";
-		String[] selectionArgs = { memberName };
+		member.getParseObject().put("email", email);
 
-		int count = db.update(MemberDB.TABLE_NAME, values, selection,
-				selectionArgs);
+		member.getParseObject().save();
 
 	}
 
-	private static void deleteFromDB(Context context, String memberName) {
-		MemberDB taskDB = new MemberDB(context);
+	private static void updateToDB(Context context, String memberName,
+			float posY) throws ParseException {
 
-		SQLiteDatabase db = taskDB.getWritableDatabase();
+		// MemberDB memberDB = new MemberDB(context);
+		// SQLiteDatabase db = memberDB.getWritableDatabase();
+		//
+		// ContentValues values = new ContentValues();
+		// values.put("POS_Y", posY);
+		//
+		// // Which row to update, based on the ID
+		// String selection = "NAME LIKE ?";
+		// String[] selectionArgs = { memberName };
+		//
+		// int count = db.update(MemberDB.TABLE_NAME, values, selection,
+		// selectionArgs);
 
-		// Define 'where' part of query.
-		String selection = "NAME LIKE ?";
-		// Specify arguments in placeholder order.
-		String[] selectionArgs = { memberName };
-		// Issue SQL statement.
-		db.delete(MemberDB.TABLE_NAME, selection, selectionArgs);
+		Member member = load(context, memberName);
+
+		member.getParseObject().put("posY", posY);
+
+		member.getParseObject().save();
+
 	}
 
-	private static Map<String, Member> getAllFromDB(Context context) {
+	private static void deleteFromDB(Context context, String memberName)
+			throws ParseException {
+		// MemberDB taskDB = new MemberDB(context);
+		//
+		// SQLiteDatabase db = taskDB.getWritableDatabase();
+		//
+		// // Define 'where' part of query.
+		// String selection = "NAME LIKE ?";
+		// // Specify arguments in placeholder order.
+		// String[] selectionArgs = { memberName };
+		// // Issue SQL statement.
+		// db.delete(MemberDB.TABLE_NAME, selection, selectionArgs);
+
+		Member member = load(context, memberName);
+
+		member.getParseObject().delete();
+
+	}
+
+	private static Map<String, Member> getAllFromDB(Context context)
+			throws ParseException {
 
 		Map<String, Member> members = new HashMap<String, Member>();
 
-		MemberDB taskDB = new MemberDB(context);
-		SQLiteDatabase db = taskDB.getReadableDatabase();
+		// MemberDB taskDB = new MemberDB(context);
+		// SQLiteDatabase db = taskDB.getReadableDatabase();
+		//
+		// String[] projection = { "NAME", "EMAIL", "POS_Y" };
+		//
+		// Cursor cursor = db.query(MemberDB.TABLE_NAME, // The table to query
+		// projection, // The columns to return
+		// null, // The columns for the WHERE clause
+		// null, // The values for the WHERE clause
+		// null, // don't group the rows
+		// null, // don't filter by row groups
+		// null // The sort order
+		// );
+		//
+		// // Iterate
+		//
+		// cursor.moveToFirst();
+		// while (cursor.isAfterLast() == false) {
+		//
+		// Member member = new Member(cursor.getString(0),
+		// cursor.getString(1), false, cursor.getFloat(2));
+		//
+		// members.put(member.getName(), member);
+		// cursor.moveToNext();
+		// }
+		//
+		// return members;
 
-		String[] projection = { "NAME", "EMAIL", "POS_Y" };
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
+		query.whereEqualTo("board", Util.getActiveBoard());
+		List<ParseObject> results = query.find();
 
-		Cursor cursor = db.query(MemberDB.TABLE_NAME, // The table to query
-				projection, // The columns to return
-				null, // The columns for the WHERE clause
-				null, // The values for the WHERE clause
-				null, // don't group the rows
-				null, // don't filter by row groups
-				null // The sort order
-				);
-
-		// Iterate
-
-		cursor.moveToFirst();
-		while (cursor.isAfterLast() == false) {
-
-			Member member = new Member(cursor.getString(0),
-					cursor.getString(1), false, cursor.getFloat(2));
+		for (ParseObject result : results) {
+			Member member = new Member(result.getString("name"),
+					result.getString("email"), false,
+					(float) result.getDouble("posY"), result);
 
 			members.put(member.getName(), member);
-			cursor.moveToNext();
 		}
-
 		return members;
 
 	}
 
-	private static Member loadFromDB(Context context, String name) {
+	private static Member loadFromDB(Context context, String name)
+			throws ParseException {
 
-		MemberDB memberDB = new MemberDB(context);
-		SQLiteDatabase db = memberDB.getReadableDatabase();
+		// MemberDB memberDB = new MemberDB(context);
+		// SQLiteDatabase db = memberDB.getReadableDatabase();
+		//
+		// String[] projection = { "NAME", "EMAIL", "POS_Y" };
+		//
+		// Cursor cursor = db.query(MemberDB.TABLE_NAME, // The table to query
+		// projection, // The columns to return
+		// "NAME like ?", // The columns for the WHERE clause
+		// new String[] { name }, // The values for the WHERE clause
+		// null, // don't group the rows
+		// null, // don't filter by row groups
+		// null // The sort order
+		// );
+		//
+		// // Iterate
+		//
+		// System.out.println("cursor.getCount() = = = = " + cursor.getCount());
+		//
+		// // /////
+		// // for(Entry<String,Member>ent : getAllFromDB(context).entrySet())
+		// // {
+		// // System.out.println("ent.getValue().getName() = = = " +
+		// // ent.getValue().getName());
+		// // }
+		// // /////
+		//
+		// cursor.moveToFirst();
+		//
+		// if (cursor.isFirst())
+		// return new Member(cursor.getString(0), cursor.getString(1), false,
+		// cursor.getFloat(2));
+		//
+		// else
+		// return null;
 
-		String[] projection = { "NAME", "EMAIL", "POS_Y" };
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
+		query.whereEqualTo("board", Util.getActiveBoard());
+		query.whereEqualTo("name", name);
+		ParseObject result = query.getFirst();
 
-		Cursor cursor = db.query(MemberDB.TABLE_NAME, // The table to query
-				projection, // The columns to return
-				"NAME like ?", // The columns for the WHERE clause
-				new String[] { name }, // The values for the WHERE clause
-				null, // don't group the rows
-				null, // don't filter by row groups
-				null // The sort order
-				);
+		Member member = new Member(result.getString("name"),
+				result.getString("email"), false,
+				(float) result.getDouble("posY"), result);
 
-		// Iterate
-
-		System.out.println("cursor.getCount() = = = = " + cursor.getCount());
-
-		// /////
-		// for(Entry<String,Member>ent : getAllFromDB(context).entrySet())
-		// {
-		// System.out.println("ent.getValue().getName() = = = " +
-		// ent.getValue().getName());
-		// }
-		// /////
-
-		cursor.moveToFirst();
-
-		if (cursor.isFirst())
-			return new Member(cursor.getString(0), cursor.getString(1), false,
-					cursor.getFloat(2));
-
-		else
-			return null;
+		return member;
 
 	}
 

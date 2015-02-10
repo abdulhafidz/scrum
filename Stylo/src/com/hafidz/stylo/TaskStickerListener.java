@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
+import com.parse.ParseException;
 
 public class TaskStickerListener implements OnDragListener,
 		OnLongClickListener, OnClickListener {
@@ -41,26 +42,31 @@ public class TaskStickerListener implements OnDragListener,
 
 				Util.hideGarbage();
 
-				RelativeLayout taskSticker = (RelativeLayout) v;
-				GridLayout memberLayout = (GridLayout) event.getLocalState();
-				TextView memberNameTV = (TextView) memberLayout
-						.findViewById(R.id.memberName);
+				try {
+					RelativeLayout taskSticker = (RelativeLayout) v;
+					GridLayout memberLayout = (GridLayout) event
+							.getLocalState();
+					TextView memberNameTV = (TextView) memberLayout
+							.findViewById(R.id.memberName);
 
-				String newOwner = memberNameTV.getText().toString();
+					String newOwner = memberNameTV.getText().toString();
 
-				// update task manager
-				String id = (String) taskSticker.getTag();
-				TaskManager.obtainLock(id);
-				TaskManager.assignOwner(context, id,
-						MemberManager.load(context, newOwner));
-				TaskManager.releaseLock(id);
+					// update task manager
+					String id = (String) taskSticker.getTag();
+					TaskManager.obtainLock(id);
+					TaskManager.assignOwner(context, id,
+							MemberManager.load(context, newOwner));
+					TaskManager.releaseLock(id);
 
-				System.out.println("* * * * * member " + newOwner
-						+ " dropped to task");
+					System.out.println("* * * * * member " + newOwner
+							+ " dropped to task");
 
-				// task sticker and member sticker UI
-				TaskManager.updateStickerOwner(taskSticker, newOwner,
-						memberLayout);
+					// task sticker and member sticker UI
+					TaskManager.updateStickerOwner(taskSticker, newOwner,
+							memberLayout);
+				} catch (ParseException e) {
+					Util.showError(context, "Problem updating the server.");
+				}
 
 				break;
 
@@ -93,73 +99,77 @@ public class TaskStickerListener implements OnDragListener,
 	@Override
 	public void onClick(View v) {
 
-		Task task = TaskManager.load(context, (String) v.getTag());
+		try {
+			Task task = TaskManager.load(context, (String) v.getTag());
 
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		ScrollView viewTaskLayout = (ScrollView) inflater.inflate(
-				R.layout.sticky_layout, null);
+			ScrollView viewTaskLayout = (ScrollView) inflater.inflate(
+					R.layout.sticky_layout, null);
 
-		// new task, so we bring them directly to edit dialog
-		if (task.getTitle() == null) {
-			showEditDialog(viewTaskLayout, task.getId());
-			return;
+			// new task, so we bring them directly to edit dialog
+			if (task.getTitle() == null) {
+				showEditDialog(viewTaskLayout, task.getId());
+				return;
+			}
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+			// set values
+			builder.setTitle(task.getTitle());
+			((TextView) viewTaskLayout.findViewById(R.id.taskDetailDesc))
+					.setText(task.getDescription());
+			TextView stat = (TextView) viewTaskLayout
+					.findViewById(R.id.taskDetailStatus);
+			switch (task.getStatus()) {
+			case Task.STATUS_IN_PROGRESS:
+				stat.setText("IN PROGRESS");
+				stat.setTextColor(Color.parseColor("#3F51B5"));
+				break;
+
+			case Task.STATUS_DONE:
+				stat.setText("DONE");
+				stat.setTextColor(Color.parseColor("#4CAF50"));
+				break;
+
+			case Task.STATUS_TODO:
+				stat.setText("TO-DO");
+				stat.setTextColor(Color.parseColor("#F44336"));
+				break;
+
+			case Task.STATUS_ROAD_BLOCK:
+				stat.setText("ROAD BLOCK");
+				stat.setTextColor(Color.parseColor("#9C27B0"));
+				break;
+			}
+
+			if (task.getOwner() != null) {
+				((TextView) viewTaskLayout.findViewById(R.id.taskDetailOwner))
+						.setText(task.getOwner().getName());
+
+				// add listeners to owner sticker
+				TextView owner = (TextView) viewTaskLayout
+						.findViewById(R.id.taskDetailOwner);
+				owner.setOnLongClickListener(new OwnerStickerListener());
+
+				// add listeners to view task layout
+				viewTaskLayout.setOnDragListener(new TaskViewListener(context,
+						task));
+			}
+
+			builder.setView(viewTaskLayout);
+
+			builder.setNegativeButton("Close", null);
+			builder.setPositiveButton("Edit", new onClickEditButtonListener(
+					task.getId(), viewTaskLayout));
+
+			AlertDialog dialog = builder.create();
+
+			dialog.show();
+		} catch (ParseException e) {
+			Util.showError(context, "Problem retrieving from server.");
 		}
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-		// set values
-		builder.setTitle(task.getTitle());
-		((TextView) viewTaskLayout.findViewById(R.id.taskDetailDesc))
-				.setText(task.getDescription());
-		TextView stat = (TextView) viewTaskLayout
-				.findViewById(R.id.taskDetailStatus);
-		switch (task.getStatus()) {
-		case Task.STATUS_IN_PROGRESS:
-			stat.setText("IN PROGRESS");
-			stat.setTextColor(Color.parseColor("#3F51B5"));
-			break;
-
-		case Task.STATUS_DONE:
-			stat.setText("DONE");
-			stat.setTextColor(Color.parseColor("#4CAF50"));
-			break;
-
-		case Task.STATUS_TODO:
-			stat.setText("TO-DO");
-			stat.setTextColor(Color.parseColor("#F44336"));
-			break;
-
-		case Task.STATUS_ROAD_BLOCK:
-			stat.setText("ROAD BLOCK");
-			stat.setTextColor(Color.parseColor("#9C27B0"));
-			break;
-		}
-
-		if (task.getOwner() != null) {
-			((TextView) viewTaskLayout.findViewById(R.id.taskDetailOwner))
-					.setText(task.getOwner().getName());
-
-			// add listeners to owner sticker
-			TextView owner = (TextView) viewTaskLayout
-					.findViewById(R.id.taskDetailOwner);
-			owner.setOnLongClickListener(new OwnerStickerListener());
-
-			// add listeners to view task layout
-			viewTaskLayout
-					.setOnDragListener(new TaskViewListener(context, task));
-		}
-
-		builder.setView(viewTaskLayout);
-
-		builder.setNegativeButton("Close", null);
-		builder.setPositiveButton("Edit",
-				new onClickEditButtonListener(task.getId(), viewTaskLayout));
-
-		AlertDialog dialog = builder.create();
-
-		dialog.show();
 
 	}
 
@@ -183,36 +193,43 @@ public class TaskStickerListener implements OnDragListener,
 	}
 
 	private void showEditDialog(ScrollView stickyLayout, String taskId) {
-		// edit task dialog show
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		try {
+			Task task = TaskManager.load(context, taskId);
 
-		LinearLayout editTaskLayout = (LinearLayout) inflater.inflate(
-				R.layout.sticky_edit_layout, null);
-		builder.setView(editTaskLayout);
-		builder.setPositiveButton("Save", null);
-		builder.setNegativeButton("Cancel", null);
+			// edit task dialog show
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-		builder.setTitle("Edit Task");
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		// pre-populate with value
-		Task task = TaskManager.load(context, taskId);
-		((EditText) editTaskLayout.findViewById(R.id.taskEditTitle))
-				.setText(task.getTitle());
-		((EditText) editTaskLayout.findViewById(R.id.taskEditDesc))
-				.setText(task.getDescription());
+			LinearLayout editTaskLayout = (LinearLayout) inflater.inflate(
+					R.layout.sticky_edit_layout, null);
+			builder.setView(editTaskLayout);
+			builder.setPositiveButton("Save", null);
+			builder.setNegativeButton("Cancel", null);
 
-		AlertDialog dialog = builder.create();
+			builder.setTitle("Edit Task");
 
-		dialog.show();
+			// pre-populate with value
+			((EditText) editTaskLayout.findViewById(R.id.taskEditTitle))
+					.setText(task.getTitle());
+			((EditText) editTaskLayout.findViewById(R.id.taskEditDesc))
+					.setText(task.getDescription());
 
-		// overide save listener because we dont want to auto dismiss dialog
-		// after save
-		Button theButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-		theButton.setOnClickListener(new TaskEditListener(context, taskId,
-				stickyLayout, dialog));
+			AlertDialog dialog = builder.create();
+
+			dialog.show();
+
+			// overide save listener because we dont want to auto dismiss dialog
+			// after save
+			Button theButton = dialog
+					.getButton(DialogInterface.BUTTON_POSITIVE);
+			theButton.setOnClickListener(new TaskEditListener(context, taskId,
+					stickyLayout, dialog));
+		} catch (ParseException e) {
+			Util.showError(context, "Problem retrieving from server.");
+		}
 	}
 
 }

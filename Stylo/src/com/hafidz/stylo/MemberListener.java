@@ -4,6 +4,7 @@ import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
+import com.parse.ParseException;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -97,18 +98,22 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 		String memberId = ((TextView) memberSticker
 				.findViewById(R.id.memberName)).getText().toString();
 
-		Member member = MemberManager.load(context, memberId);
+		try {
+			Member member = MemberManager.load(context, memberId);
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle(member.getName());
-		builder.setMessage(member.getEmail());
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			builder.setTitle(member.getName());
+			builder.setMessage(member.getEmail());
 
-		builder.setNegativeButton("Close", null);
-		builder.setPositiveButton("Edit", new onClickEditButtonListener(
-				memberId));
+			builder.setNegativeButton("Close", null);
+			builder.setPositiveButton("Edit", new onClickEditButtonListener(
+					memberId));
 
-		AlertDialog dialog = builder.create();
-		dialog.show();
+			AlertDialog dialog = builder.create();
+			dialog.show();
+		} catch (ParseException e) {
+			Util.showError(context, "Problem retrieving from server.");
+		}
 
 	}
 
@@ -123,14 +128,21 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 
 		@Override
 		public void onClick(DialogInterface dialogInterface, int which) {
-			showEditDialog(context, memberName, false);
+			try {
+				showEditDialog(context, memberName, false);
+			} catch (ParseException e) {
+				Util.showError(context, "Problem retrieving from server.");
+			}
 
 		}
 
 	}
 
 	public static void showEditDialog(Context context, String memberName,
-			boolean firstTime) {
+			boolean firstTime) throws ParseException {
+
+		Member member = MemberManager.load(context, memberName);
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
 		LayoutInflater inflater = (LayoutInflater) context
@@ -147,7 +159,6 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 				null, firstTime, context));
 
 		// pre-populate with value
-		Member member = MemberManager.load(context, memberName);
 		((EditText) editMemberLayout.findViewById(R.id.memberEditName))
 				.setText(member.getName());
 		((EditText) editMemberLayout.findViewById(R.id.memberEditEmail))

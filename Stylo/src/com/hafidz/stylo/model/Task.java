@@ -3,6 +3,8 @@
  */
 package com.hafidz.stylo.model;
 
+import com.parse.ParseObject;
+
 import android.widget.RelativeLayout;
 
 /**
@@ -27,6 +29,8 @@ public class Task {
 	private float posX;
 	private float posY;
 
+	private ParseObject parseObject;
+
 	// reference to the small task
 	// private RelativeLayout smallTask;
 
@@ -37,9 +41,10 @@ public class Task {
 	// setPos(posX, posY);
 	// }
 
-	public Task(String id, float posX, float posY) {
+	public Task(String id, float posX, float posY, ParseObject parseObject) {
 		this.id = id;
 		setPos(posX, posY);
+		this.parseObject = parseObject;
 	}
 
 	public String getTitle() {
@@ -112,6 +117,10 @@ public class Task {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	public ParseObject getParseObject() {
+		return parseObject;
 	}
 
 }

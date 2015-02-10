@@ -1,5 +1,7 @@
 package com.hafidz.stylo.model;
 
+import com.parse.ParseObject;
+
 import android.widget.GridLayout;
 
 public class Member {
@@ -10,6 +12,8 @@ public class Member {
 	private boolean me;
 
 	private float posY;
+
+	private ParseObject parseObject;
 
 	// Reference to member UI
 	// private GridLayout memberSticker;
@@ -24,12 +28,14 @@ public class Member {
 	// this.memberSticker = memberSticker;
 	// }
 
-	public Member(String name, String email, boolean me, float posY) {
+	public Member(String name, String email, boolean me, float posY,
+			ParseObject parseObject) {
 		super();
 		this.name = name;
 		this.email = email;
 		this.me = me;
 		this.posY = posY;
+		this.parseObject = parseObject;
 
 	}
 
@@ -71,6 +77,10 @@ public class Member {
 
 	public void setPosY(float posY) {
 		this.posY = posY;
+	}
+
+	public ParseObject getParseObject() {
+		return parseObject;
 	}
 
 }

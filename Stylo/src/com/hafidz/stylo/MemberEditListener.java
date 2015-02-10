@@ -2,6 +2,7 @@ package com.hafidz.stylo;
 
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.TaskManager;
+import com.parse.ParseException;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -37,48 +38,55 @@ public class MemberEditListener implements OnClickListener,
 
 		// save button clicked
 
-		EditText editName = (EditText) editDialog
-				.findViewById(R.id.memberEditName);
-		EditText editEmail = (EditText) editDialog
-				.findViewById(R.id.memberEditEmail);
+		try {
+			EditText editName = (EditText) editDialog
+					.findViewById(R.id.memberEditName);
+			EditText editEmail = (EditText) editDialog
+					.findViewById(R.id.memberEditEmail);
 
-		// validation
-		if (editName.getText() == null
-				|| editName.getText().toString().trim().isEmpty()) {
-			editName.setError("Please insert a name.");
-			return;
-		}
-		if (!memberName.equals(editName.getText().toString())) {
-			if (MemberManager.getAll(context).containsKey(
-					editName.getText().toString())) {
-				editName.setError("Name is already taken. Please try other name.");
+			// validation
+			if (editName.getText() == null
+					|| editName.getText().toString().trim().isEmpty()) {
+				editName.setError("Please insert a name.");
 				return;
 			}
+			if (!memberName.equals(editName.getText().toString())) {
+				if (MemberManager.getAll(context).containsKey(
+						editName.getText().toString())) {
+					editName.setError("Name is already taken. Please try other name.");
+					return;
+				}
+			}
+
+			// update manager
+			MemberManager.obtainLock(memberName);
+			MemberManager.updateMember(context, memberName, editName.getText()
+					.toString(), editEmail.getText().toString());
+			MemberManager.releaseLock(memberName);
+
+			editDialog.dismiss();
+		} catch (ParseException e) {
+			Util.showError(context, "Problem updating server.");
 		}
-
-		// update manager
-		MemberManager.obtainLock(memberName);
-		MemberManager.updateMember(context, memberName, editName.getText()
-				.toString(), editEmail.getText().toString());
-		MemberManager.releaseLock(memberName);
-
-		editDialog.dismiss();
 
 	}
 
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
 
-		System.out.println("11111111111111111111111111111111111111111111111");
 		// cancel button clicked
 		if (Dialog.BUTTON_NEGATIVE == which) {
-			System.out.println("222222222222222222222222222222222222222222222");
+
 			// if first time and cancel, we delete back the pre created member
 			if (firstTime) {
-				System.out.println("3333333333333333333333333333333333333333");
-				MemberManager.obtainLock(memberName);
-				MemberManager.remove(context, memberName);
-				MemberManager.releaseLock(memberName);
+
+				try {
+					MemberManager.obtainLock(memberName);
+					MemberManager.remove(context, memberName);
+					MemberManager.releaseLock(memberName);
+				} catch (ParseException e) {
+					Util.showError(context, "Problem updating server.");
+				}
 
 			}
 		}
