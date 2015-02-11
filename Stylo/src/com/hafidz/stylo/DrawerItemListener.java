@@ -32,6 +32,12 @@ public class DrawerItemListener implements ListView.OnItemClickListener {
 
 			drawerLayout.closeDrawers();
 			break;
+
+		case 1:
+			Util.showGuide(main.getApplicationContext());
+
+			drawerLayout.closeDrawers();
+			break;
 		}
 	}
 

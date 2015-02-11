@@ -6,6 +6,8 @@ package com.hafidz.stylo;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.Toast;
  */
 public class Util {
 
+	public static String VERSION = "0.1";
 	public static ImageView garbage;
 	public static RelativeLayout whiteboardLayout;
 
@@ -97,12 +100,21 @@ public class Util {
 	}
 
 	public static String getActiveBoard() {
-		//return "abdulhafidz@gmail.com";
+		// return "abdulhafidz@gmail.com";
 		return "ETHAN@HP";
 	}
 
 	public static void showError(Context context, String msg) {
 		Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+	}
+
+	public static void showGuide(Context context) {
+		AlertDialog.Builder dialogBuilder = new Builder(context);
+		dialogBuilder.setTitle("Welcome to Scrum Board " + VERSION);
+		dialogBuilder
+				.setMessage("This is a collaborative app where scrum team can view and update the same scrum board in real-time (sort of).\n\n- Long click on empty space to create task.\n\n- Long click on empty space on far left panel to add member.\n\n- Long click and drag member to task sticker to assign owner.\n\n- In view task dialog, long click and drag the owner out to unassign owner.\n\n- Drag sticker to the bin to remove it.\n\n- Swipe down the board to refresh.");
+		dialogBuilder.setNegativeButton(android.R.string.ok, null);
+		dialogBuilder.create().show();
 	}
 
 }

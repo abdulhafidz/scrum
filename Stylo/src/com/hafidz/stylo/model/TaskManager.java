@@ -341,6 +341,7 @@ public class TaskManager {
 
 		parseObject.put("posX", posX);
 		parseObject.put("posY", posY);
+		parseObject.put("status", status);
 
 		parseObject.save();
 

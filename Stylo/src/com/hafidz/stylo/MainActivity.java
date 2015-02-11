@@ -11,13 +11,18 @@ import com.parse.Parse;
 import com.parse.ParseException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,12 +48,13 @@ import android.widget.TextView;
  * @author hafidz
  * 
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnRefreshListener {
 
 	private View mainActivityLayout;
 	private WhiteBoardScroller whiteBoardScroller;
 	private RelativeLayout whiteBoardLayout;
 	// private WhiteboardView whiteboardView;
+	private SwipeRefreshLayout mainLayout;
 
 	private DrawerLayout drawerLayout;
 	private ListView drawerList;
@@ -56,6 +62,20 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// check first time user or not
+		SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+		boolean firstTime = sharedPref.getBoolean("firstTime", true);
+		if (firstTime) {
+			// show guide
+			Util.showGuide(getApplicationContext());
+
+			// change firstTime to false
+			SharedPreferences.Editor editor = sharedPref.edit();
+			editor.putBoolean("firstTime", false);
+			editor.commit();
+
+		}
 
 		// Enable Local Datastore.
 		Parse.enableLocalDatastore(this);
@@ -70,9 +90,10 @@ public class MainActivity extends Activity {
 		drawerList = (ListView) findViewById(R.id.drawerList);
 		ArrayAdapter<String> drawerAdapter = new ArrayAdapter<String>(
 				getApplicationContext(), android.R.layout.simple_list_item_1,
-				new String[] { "Refresh" });
+				new String[] { "Refresh","User Guide" });
 		drawerList.setAdapter(drawerAdapter);
-		drawerList.setOnItemClickListener(new DrawerItemListener(this,drawerLayout));
+		drawerList.setOnItemClickListener(new DrawerItemListener(this,
+				drawerLayout));
 
 		// init widgets
 		// whiteBoardLayout = (RelativeLayout) findViewById(R.id.whiteBoard);
@@ -117,9 +138,18 @@ public class MainActivity extends Activity {
 		Util.whiteboardLayout = whiteBoardLayout;
 
 		// add to main layout
-		FrameLayout mainLayout = (FrameLayout) findViewById(R.id.drawerMainContent);
+		mainLayout = (SwipeRefreshLayout) findViewById(R.id.drawerMainContent);
+		mainLayout.setOnRefreshListener(this);
 		mainLayout.addView(whiteBoardScroller);
-		mainLayout.addView(garbage);
+		// mainLayout.setColorScheme(Color.parseColor("#3F51B5"),
+		// Color.parseColor("#FFEB3B"), Color.parseColor("#3F51B5"),
+		// Color.parseColor("#FFEB3B"));
+		mainLayout.setColorScheme(android.R.color.holo_blue_bright,
+				android.R.color.holo_green_light,
+				android.R.color.holo_orange_light,
+				android.R.color.holo_red_light);
+		addContentView(garbage, new LayoutParams(100, 100));
+		// mainLayout.addView(garbage);
 
 	}
 
@@ -149,6 +179,8 @@ public class MainActivity extends Activity {
 	}
 
 	public void reloadStickers() {
+
+		mainLayout.setRefreshing(true);
 
 		// clear all sticker
 		Util.whiteboardLayout.removeAllViews();
@@ -182,13 +214,13 @@ public class MainActivity extends Activity {
 		doneText.setPaddingRelative(toPixelsWidth(82), textTop, 0, textTop);
 		whiteBoardLayout.addView(doneText);
 
-		ProgressDialog progress = new ProgressDialog(this);
-		// progress.setTitle("Loading");
-		progress.setMessage("Loading from server...");
-		progress.show();
+		// ProgressDialog progress = new ProgressDialog(this);
+		// // progress.setTitle("Loading");
+		// progress.setMessage("Loading from server...");
+		// progress.show();
 
 		// load stickers on another thread
-		new Thread(new StickerLoader(progress)).start();
+		new Thread(new StickerLoader()).start();
 	}
 
 	@Override
@@ -198,11 +230,6 @@ public class MainActivity extends Activity {
 	}
 
 	private class StickerLoader implements Runnable {
-		private ProgressDialog progress;
-
-		public StickerLoader(ProgressDialog progress) {
-			this.progress = progress;
-		}
 
 		@Override
 		public void run() {
@@ -214,17 +241,16 @@ public class MainActivity extends Activity {
 				Map<String, Task> tasks = TaskManager
 						.getAll(getApplicationContext());
 
-				activity.runOnUiThread(new StickerLoaderUI(members, tasks,
-						progress));
+				activity.runOnUiThread(new StickerLoaderUI(members, tasks));
 
 			} catch (ParseException e1) {
 				activity.runOnUiThread(new Runnable() {
 
 					@Override
 					public void run() {
-						progress.dismiss();
 						Util.showError(getApplicationContext(),
 								"Problem loading sticker(s) from server.");
+						mainLayout.setRefreshing(false);
 					}
 				});
 
@@ -237,13 +263,11 @@ public class MainActivity extends Activity {
 
 		private Map<String, Member> members;
 		private Map<String, Task> tasks;
-		private ProgressDialog progress;
 
 		public StickerLoaderUI(Map<String, Member> members,
-				Map<String, Task> tasks, ProgressDialog progress) {
+				Map<String, Task> tasks) {
 			this.members = members;
 			this.tasks = tasks;
-			this.progress = progress;
 		}
 
 		@Override
@@ -278,12 +302,18 @@ public class MainActivity extends Activity {
 
 			}
 
-			progress.dismiss();
+			mainLayout.setRefreshing(false);
 
-			Toast.makeText(getApplicationContext(), "Welcome!",
-					Toast.LENGTH_SHORT).show();
+			// Toast.makeText(getApplicationContext(), "Welcome!",
+			// Toast.LENGTH_SHORT).show();
 
 		}
+
+	}
+
+	@Override
+	public void onRefresh() {
+		reloadStickers();
 
 	}
 }
