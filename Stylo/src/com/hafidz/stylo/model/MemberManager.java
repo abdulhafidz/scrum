@@ -115,7 +115,7 @@ public class MemberManager {
 
 	}
 
-	private static void saveToDB(Context context, Member task)
+	private static void saveToDB(Context context, Member member)
 			throws ParseException {
 
 		// MemberDB memberDB = new MemberDB(context);
@@ -133,13 +133,15 @@ public class MemberManager {
 		// push to server
 		ParseObject testObject = new ParseObject("Member");
 		testObject.put("board", Util.getActiveBoard());
-		testObject.put("name", task.getName());
-		if (task.getEmail() != null)
-			testObject.put("email", task.getEmail());
+		testObject.put("name", member.getName());
+		if (member.getEmail() != null)
+			testObject.put("email", member.getEmail());
 
-		testObject.put("posY", task.getPosY());
+		testObject.put("posY", member.getPosY());
 
-		testObject.save();
+		// testObject.save();
+		Util.startLoading();
+		testObject.saveInBackground(new MemberSaveCallback(member, context));
 
 	}
 
@@ -163,7 +165,10 @@ public class MemberManager {
 
 		member.getParseObject().put("email", email);
 
-		member.getParseObject().save();
+		// member.getParseObject().save();
+		Util.startLoading();
+		member.getParseObject().saveInBackground(
+				new MemberSaveCallback(member, context));
 
 	}
 
@@ -187,7 +192,10 @@ public class MemberManager {
 
 		member.getParseObject().put("posY", posY);
 
-		member.getParseObject().save();
+		// member.getParseObject().save();
+		Util.startLoading();
+		member.getParseObject().saveInBackground(
+				new MemberSaveCallback(member, context));
 
 	}
 

@@ -14,18 +14,20 @@ import android.view.View.OnDragListener;
 import android.widget.Toast;
 
 /**
- * @author johariab
+ * @author hafidz
  * 
  */
 public class TaskViewListener implements OnDragListener {
 
 	private Context context;
-	private Task task;
+	private String taskId;
 	private boolean in;
+	private String owner;
 
-	public TaskViewListener(Context context, Task task) {
+	public TaskViewListener(Context context, String task, String owner) {
 		this.context = context;
-		this.task = task;
+		this.taskId = task;
+		this.owner = owner;
 	}
 
 	@Override
@@ -41,7 +43,8 @@ public class TaskViewListener implements OnDragListener {
 			} else {
 
 				try {
-					TaskManager.freeOwner(context, task);
+					TaskManager.freeOwner(context,
+							TaskManager.load(context, taskId));
 				} catch (ParseException e) {
 					View owner = (View) event.getLocalState();
 					owner.setVisibility(View.VISIBLE);

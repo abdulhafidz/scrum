@@ -1,19 +1,14 @@
 package com.hafidz.stylo;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.GridLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;
@@ -96,9 +91,11 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 			Task task = new Task(id, Util.toPercentageWidth(context, x), y,
 					null);
-			TaskManager.add(context, task);
 
 			TaskManager.createEmptySticker(context, x, y, id);
+
+			TaskManager.add(context, task);
+
 		} catch (ParseException e) {
 			Util.showError(context, "Problem updating to the server.");
 		} finally {
@@ -106,6 +103,55 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		}
 
 		return true;
+	}
+
+	private class TaskMovedThread implements Runnable {
+
+		private String taskId;
+		private float newX;
+		private float newY;
+
+		public TaskMovedThread(String taskId, float newX, float newY) {
+			this.taskId = taskId;
+			this.newX = newX;
+			this.newY = newY;
+		}
+
+		@Override
+		public void run() {
+			try {
+				TaskManager.obtainLock(taskId);
+				TaskManager.moved(context, taskId,
+						Util.toPercentageWidth(context, newX), newY);
+				TaskManager.releaseLock(taskId);
+
+				Util.mainActivity.runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						Util.stopLoading();
+
+						Util.showSuccess(context, "Task updated in server.");
+
+					}
+				});
+			} catch (ParseException e) {
+				Util.mainActivity.runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						Util.stopLoading();
+
+						Util.showError(context,
+								"Problem saving task to server.");
+
+						Util.reloadStickers();
+
+					}
+				});
+			}
+
+		}
 	}
 
 	@Override
@@ -123,27 +169,21 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 				// update manager
 				String taskId = (String) task.getTag();
-				TaskManager.obtainLock(taskId);
-				try {
-					TaskManager.moved(context,
-							TaskManager.load(context, taskId),
-							Util.toPercentageWidth(context, newX), newY);
-					TaskManager.releaseLock(taskId);
 
-					System.out
-							.println("* * * * * drag dropped on whiteboard : "
-									+ task.getId());
+				Util.startLoading();
+				Thread bgUpdate = new Thread(new TaskMovedThread(taskId, newX,
+						newY));
+				bgUpdate.start();
 
-					// set post-it to new position
-					task.setX(event.getX() - toPixelsWidth(STICKY_X_OFFSET));
-					task.setY(event.getY() - STICKY_Y_OFFSET);
+				System.out.println("* * * * * drag dropped on whiteboard : "
+						+ task.getId());
 
-					// bring to front
-					task.bringToFront();
-				} catch (ParseException e) {
-					task.setVisibility(View.VISIBLE);
-					Util.showError(context, "Problem updating server.");
-				}
+				// set post-it to new position
+				task.setX(event.getX() - toPixelsWidth(STICKY_X_OFFSET));
+				task.setY(event.getY() - STICKY_Y_OFFSET);
+
+				// bring to front
+				task.bringToFront();
 
 			}
 			/* member dropped */

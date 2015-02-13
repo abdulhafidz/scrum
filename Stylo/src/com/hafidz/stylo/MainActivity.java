@@ -3,20 +3,10 @@ package com.hafidz.stylo;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.hafidz.stylo.model.Member;
-import com.hafidz.stylo.model.MemberManager;
-import com.hafidz.stylo.model.Task;
-import com.hafidz.stylo.model.TaskManager;
-import com.parse.Parse;
-import com.parse.ParseException;
-
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -25,17 +15,19 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
+
+import com.hafidz.stylo.model.Member;
+import com.hafidz.stylo.model.MemberManager;
+import com.hafidz.stylo.model.Task;
+import com.hafidz.stylo.model.TaskManager;
+import com.parse.Parse;
+import com.parse.ParseException;
 
 /**
  * TODO : onlongclick edit, overall view, ontouch hand cursor, road block,
@@ -58,6 +50,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 	private DrawerLayout drawerLayout;
 	private ListView drawerList;
+
+	private ProgressDialog progress;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +84,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		drawerList = (ListView) findViewById(R.id.drawerList);
 		ArrayAdapter<String> drawerAdapter = new ArrayAdapter<String>(
 				getApplicationContext(), android.R.layout.simple_list_item_1,
-				new String[] { "Refresh","User Guide" });
+				new String[] { "Refresh", "User Guide", "About" });
 		drawerList.setAdapter(drawerAdapter);
 		drawerList.setOnItemClickListener(new DrawerItemListener(this,
 				drawerLayout));
@@ -149,7 +143,12 @@ public class MainActivity extends Activity implements OnRefreshListener {
 				android.R.color.holo_orange_light,
 				android.R.color.holo_red_light);
 		addContentView(garbage, new LayoutParams(100, 100));
-		// mainLayout.addView(garbage);
+
+		// for easy access later
+		Util.mainLayout = mainLayout;
+		Util.mainActivity = this;
+
+		progress = new ProgressDialog(getApplicationContext());
 
 	}
 
@@ -181,6 +180,9 @@ public class MainActivity extends Activity implements OnRefreshListener {
 	public void reloadStickers() {
 
 		mainLayout.setRefreshing(true);
+		// progress.setTitle("Loading");
+		progress.setMessage("Loading from server...");
+		progress.show();
 
 		// clear all sticker
 		Util.whiteboardLayout.removeAllViews();
@@ -214,11 +216,6 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		doneText.setPaddingRelative(toPixelsWidth(82), textTop, 0, textTop);
 		whiteBoardLayout.addView(doneText);
 
-		// ProgressDialog progress = new ProgressDialog(this);
-		// // progress.setTitle("Loading");
-		// progress.setMessage("Loading from server...");
-		// progress.show();
-
 		// load stickers on another thread
 		new Thread(new StickerLoader()).start();
 	}
@@ -251,6 +248,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 						Util.showError(getApplicationContext(),
 								"Problem loading sticker(s) from server.");
 						mainLayout.setRefreshing(false);
+						progress.dismiss();
+
 					}
 				});
 
@@ -292,18 +291,19 @@ public class MainActivity extends Activity implements OnRefreshListener {
 				TaskManager.updateSticker(sticker, task.getTitle(),
 						task.getDescription());
 				if (task.getOwner() != null) {
-					TaskManager.updateStickerOwner(sticker, task.getOwner()
-							.getName(), null);
+					TaskManager.updateStickerOwner(sticker, task.getOwner(),
+							null);
 
 					// remove from members pool
-					Util.whiteboardLayout.findViewWithTag(
-							task.getOwner().getName()).setVisibility(View.GONE);
+					Util.whiteboardLayout.findViewWithTag(task.getOwner())
+							.setVisibility(View.GONE);
 				}
 
 			}
 
 			mainLayout.setRefreshing(false);
 
+			progress.dismiss();
 			// Toast.makeText(getApplicationContext(), "Welcome!",
 			// Toast.LENGTH_SHORT).show();
 

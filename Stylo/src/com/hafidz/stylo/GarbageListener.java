@@ -9,8 +9,10 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hafidz.stylo.model.MemberManager;
+import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
 import com.parse.ParseException;
 
@@ -77,19 +79,17 @@ public class GarbageListener implements OnDragListener {
 				Util.hideGarbage();
 				garbage.setColorFilter(null);
 
-				RelativeLayout task = (RelativeLayout) event.getLocalState();
+				RelativeLayout taskSticker = (RelativeLayout) event
+						.getLocalState();
 
-				String taskId = (String) task.getTag();
+				String taskId = (String) taskSticker.getTag();
 
-				try {
-					TaskManager.obtainLock(taskId);
-					TaskManager.remove(context, TaskManager.load(context,
-							taskId), (RelativeLayout) Util.whiteboardLayout
-							.findViewWithTag(taskId));
-					TaskManager.releaseLock(taskId);
-				} catch (ParseException e) {
-					Util.showError(context, "Problem updating server.");
-				}
+				Util.startLoading();
+				Thread deleteThread = new Thread(new DeleteThread(taskId));
+				deleteThread.start();
+
+				// update UI
+				Util.whiteboardLayout.removeView(taskSticker);
 
 				break;
 
@@ -113,5 +113,68 @@ public class GarbageListener implements OnDragListener {
 
 		// non member
 		return false;
+	}
+
+	private class DeleteThreadUI implements Runnable {
+
+		private Task task;
+
+		public DeleteThreadUI(Task task) {
+			this.task = task;
+		}
+
+		@Override
+		public void run() {
+			if (task.getOwner() != null) {
+				GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
+						.findViewWithTag(task.getOwner());
+				memberSticker.setVisibility(View.VISIBLE);
+
+				Util.showSuccess(context, task.getOwner() + " is now free.");
+			}
+
+			Util.stopLoading();
+			Util.showSuccess(context, "Task deleted at server.");
+
+		}
+
+	}
+
+	private class DeleteThread implements Runnable {
+
+		private String taskId;
+
+		public DeleteThread(String taskId) {
+			this.taskId = taskId;
+		}
+
+		@Override
+		public void run() {
+			try {
+				Task task = TaskManager.load(context, taskId);
+
+				TaskManager.obtainLock(taskId);
+				TaskManager.remove(context, task);
+				TaskManager.releaseLock(taskId);
+
+				Util.mainActivity.runOnUiThread(new DeleteThreadUI(task));
+
+			} catch (ParseException e) {
+				e.printStackTrace();
+
+				Util.mainActivity.runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						Util.stopLoading();
+						Util.showSuccess(context,
+								"Problem deleting task at server.");
+						Util.reloadStickers();
+					}
+				});
+			}
+
+		}
+
 	}
 }

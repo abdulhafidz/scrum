@@ -21,7 +21,8 @@ public class Task {
 	private String id;
 	private String title;
 	private String description;
-	private Member owner;
+	// private Member owner;
+	private String owner;
 	private int points;
 	private int status;
 
@@ -103,11 +104,11 @@ public class Task {
 	// this.smallTask = smallTask;
 	// }
 
-	public Member getOwner() {
+	public String getOwner() {
 		return owner;
 	}
 
-	public void setOwner(Member owner) {
+	public void setOwner(String owner) {
 		this.owner = owner;
 	}
 

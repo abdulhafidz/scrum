@@ -17,12 +17,15 @@ import com.hafidz.stylo.TaskStickerListener;
 import com.hafidz.stylo.Util;
 import com.hafidz.stylo.WhiteBoardListener;
 import com.hafidz.stylo.WhiteBoardScroller;
+import com.parse.DeleteCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 public class TaskManager {
-	// public static Map<String, Task> allTasks = new HashMap<String, Task>();
+
+	// cache
+	public static Map<String, ParseObject> parseObjects = new HashMap<String, ParseObject>();
 
 	public static Map<String, Task> getAll(Context context)
 			throws ParseException {
@@ -49,13 +52,21 @@ public class TaskManager {
 		saveToDB(context, task);
 	}
 
-	public static void assignOwner(Context context, Task task, Member owner)
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @param owner
+	 * @throws ParseException
+	 */
+	public static void assignOwner(Context context, String taskId, Member owner)
 			throws ParseException {
 
-		updateToDB(context, task, owner.getName());
+		updateToDB(context, taskId, owner.getName());
 
-		Toast.makeText(context, owner.getName() + " assigned to a task.",
-				Toast.LENGTH_SHORT).show();
+		// Toast.makeText(context, owner.getName() + " assigned to a task.",
+		// Toast.LENGTH_SHORT).show();
 	}
 
 	public static void updateStickerOwner(RelativeLayout sticker,
@@ -97,94 +108,136 @@ public class TaskManager {
 	public static void releaseLock(String taskId) {
 	}
 
-	public static void moved(Context context, Task task, float x, float y)
+	/**
+	 * 
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @param x
+	 * @param y
+	 * @throws ParseException
+	 */
+	public static void moved(Context context, String taskId, float x, float y)
 			throws ParseException {
 
 		// update status
 		// Task task = load(context, taskId);
+		int status;
 		if (x >= (WhiteBoardScroller.LINE_IN_PROGRESS - WhiteBoardListener.STICKY_X_OFFSET)
 				&& x < (WhiteBoardScroller.LINE_DONE - WhiteBoardListener.STICKY_X_OFFSET)) {
-			task.setStatus(Task.STATUS_IN_PROGRESS);
+			// task.setStatus(Task.STATUS_IN_PROGRESS);
+			status = Task.STATUS_IN_PROGRESS;
 
-			Toast.makeText(context, "Task in progress.", Toast.LENGTH_SHORT)
-					.show();
+			// Toast.makeText(context, "Task in progress.", Toast.LENGTH_SHORT)
+			// .show();
 
 		} else if (x >= WhiteBoardScroller.LINE_DONE
 				- WhiteBoardListener.STICKY_X_OFFSET) {
-			task.setStatus(Task.STATUS_DONE);
+			// task.setStatus(Task.STATUS_DONE);
+			status = Task.STATUS_DONE;
 
-			Toast.makeText(context, "Well done!", Toast.LENGTH_SHORT).show();
+			// Toast.makeText(context, "Well done!", Toast.LENGTH_SHORT).show();
 
 		} else {
-			task.setStatus(Task.STATUS_TODO);
+			// task.setStatus(Task.STATUS_TODO);
+			status = Task.STATUS_TODO;
 
-			Toast.makeText(context, "Task in TO-DO.", Toast.LENGTH_SHORT)
-					.show();
+			// Toast.makeText(context, "Task in TO-DO.", Toast.LENGTH_SHORT)
+			// .show();
 		}
 
-		updateToDB(context, task, x, y, task.getStatus());
+		updateToDB(context, taskId, x, y, status);
 	}
 
-	public static void updateTask(Context context, Task task, String title,
-			String desc, RelativeLayout sticker) throws ParseException {
-		// Task task = allTasks.get(taskId);
-		// task.setTitle(title);
-		// task.setDescription(desc);
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @param title
+	 * @param desc
+	 * @param sticker
+	 * @throws ParseException
+	 */
+	public static void updateTask(Context context, String taskId, String title,
+			String desc) throws ParseException {
 
-		// update ui (small task)
-		// RelativeLayout smallTask = task.getSmallTask();
-		RelativeLayout smallTask = sticker;
-		updateSticker(sticker, title, desc);
-
-		// update ui (big view task)
-
-		updateToDB(context, task, title, desc);
+		updateToDB(context, taskId, title, desc);
 
 	}
 
 	public static void updateSticker(RelativeLayout sticker, String title,
 			String desc) {
-		// ((TextView) smallTask.findViewById(R.id.smallTaskTitle)).setText(Html
-		// .fromHtml("<u>" + title + "</u>"));
+
 		((TextView) sticker.findViewById(R.id.smallTaskTitle)).setText(title);
 		((TextView) sticker.findViewById(R.id.smallTaskDesc)).setText(desc);
 
 	}
 
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @return
+	 * @throws ParseException
+	 */
 	public static Task load(Context context, String taskId)
 			throws ParseException {
-		// return allTasks.get(taskId);
-		return loadFromDB(context, taskId);
+
+		ParseObject result = loadFromDB(context, taskId);
+
+		Task task = new Task(result.getString("id"),
+				(float) result.getDouble("posX"),
+				(float) result.getDouble("posY"), result);
+		task.setTitle(result.getString("title"));
+		task.setDescription(result.getString("description"));
+		if (result.getString("owner") != null)
+			task.setOwner(result.getString("owner"));
+		task.setStatus(result.getInt("status"));
+
+		return task;
 
 	}
 
-	public static void remove(Context context, Task task, RelativeLayout sticker)
-			throws ParseException {
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param task
+	 * @param sticker
+	 * @throws ParseException
+	 */
+	public static void remove(Context context, Task task) throws ParseException {
 
-		freeOwner(context, task, sticker);
-
-		Util.whiteboardLayout.removeView(sticker);
+		freeOwner(context, task);
 
 		deleteFromDB(context, task);
 
-		Toast.makeText(context, "Task removed.", Toast.LENGTH_SHORT).show();
 	}
 
-	public static void freeOwner(Context context, Task task,
-			RelativeLayout taskSticker) throws ParseException {
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @param taskSticker
+	 * @param ownerName
+	 * @throws ParseException
+	 */
+	public static void freeOwner(Context context, String taskId,
+			RelativeLayout taskSticker, String ownerName) throws ParseException {
 
 		TextView memberName = (TextView) taskSticker
 				.findViewById(R.id.taskDetailOwner);
 		String recoveredMemberName = memberName.getText().toString();
 		memberName.setText(null);
 
-		Member member = task.getOwner();
-		if (member != null) {
+		if (ownerName != null) {
 
-			task.setOwner(null);
-			updateToDB(context, task, null);
-
-			String name = member.getName();
+			// task.setOwner(null);
+			updateToDB(context, taskId, null);
 
 			GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
 					.findViewWithTag(recoveredMemberName);
@@ -193,39 +246,24 @@ public class TaskManager {
 					View.VISIBLE);
 
 			// toast
-			Toast.makeText(context, name + " is now free.", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(context, ownerName + " is now free.",
+					Toast.LENGTH_SHORT).show();
 		}
 
 	}
 
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @param ownerName
+	 * @throws ParseException
+	 */
 	public static void freeOwner(Context context, Task task)
 			throws ParseException {
 
-		Member member = task.getOwner();
-		if (member != null) {
-			updateToDB(context, task, null);
-
-			String name = task.getOwner().getName();
-			// GridLayout memberSticker = member.getMemberSticker();
-
-			GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
-					.findViewWithTag(member.getName());
-			memberSticker.setVisibility(View.VISIBLE);
-
-			task.setOwner(null);
-
-			// update small task sticker
-			View smallTask = Util.whiteboardLayout
-					.findViewWithTag(task.getId());
-			TextView smallOwner = (TextView) smallTask
-					.findViewById(R.id.taskDetailOwner);
-			smallOwner.setText(null);
-
-			// toast
-			Toast.makeText(context, name + " is now free.", Toast.LENGTH_SHORT)
-					.show();
-		}
+		updateToDB(context, task.getId(), null);
 
 	}
 
@@ -245,68 +283,29 @@ public class TaskManager {
 		testObject.put("status", task.getStatus());
 		testObject.put("posX", task.getPosX());
 		testObject.put("posY", task.getPosY());
-		testObject.save();
+		// testObject.save();
 
-		// // save to DB
-		// TaskDB taskDB = new TaskDB(context);
-		// SQLiteDatabase db = taskDB.getWritableDatabase();
-		// ContentValues values = new ContentValues();
-		// values.put("TASK_ID", task.getId());
-		// values.put("TITLE", task.getTitle());
-		// values.put("DESC", task.getDescription());
-		// if (task.getOwner() != null)
-		// values.put("OWNER", task.getOwner().getName());
-		// values.put("POS_X", task.getPosX());
-		// values.put("POS_Y", task.getPosY());
-		// values.put("STATUS", task.getStatus());
-		// long newRowId;
-		// newRowId = db.insert(TaskDB.TABLE_NAME, null, values);
+		Util.startLoading();
+		testObject.saveInBackground(new TaskSaveCallback(context));
 
 	}
 
-	// private static void updateToDB(Context context, Task task) {
-	//
-	// TaskDB taskDB = new TaskDB(context);
-	//
-	// SQLiteDatabase db = taskDB.getWritableDatabase();
-	//
-	// ContentValues values = new ContentValues();
-	// // values.put("TASK_ID", task.getId());
-	// values.put("TITLE", task.getTitle());
-	// values.put("DESC", task.getDescription());
-	// values.put("OWNER", task.getOwner().getName());
-	// values.put("POS_X", task.getPosX());
-	// values.put("POS_Y", task.getPosY());
-	//
-	// // Which row to update, based on the ID
-	// String selection = "TASK_ID LIKE ?";
-	// String[] selectionArgs = { task.getId() };
-	//
-	// int count = db.update(TaskDB.TABLE_NAME, values, selection,
-	// selectionArgs);
-	//
-	// }
-
-	private static void updateToDB(Context context, Task task, String newOwner)
+	/**
+	 * 
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param task
+	 * @param newOwner
+	 * @throws ParseException
+	 */
+	private static void updateToDB(Context context, String task, String newOwner)
 			throws ParseException {
 
-		// TaskDB taskDB = new TaskDB(context);
-		//
-		// SQLiteDatabase db = taskDB.getWritableDatabase();
-		//
-		// ContentValues values = new ContentValues();
-		// values.put("OWNER", newOwner);
-		//
-		// // Which row to update, based on the ID
-		// String selection = "TASK_ID LIKE ?";
-		// String[] selectionArgs = { taskId };
-		//
-		// int count = db.update(TaskDB.TABLE_NAME, values, selection,
-		// selectionArgs);
+		// ParseObject parseObject = task.getParseObject();
 
-		ParseObject parseObject = task.getParseObject();
-
-		// TODO : sync or lock before updating
+		// we want to update fresh copy
+		ParseObject parseObject = loadFromDB(context, task);
 
 		if (newOwner == null) {
 			parseObject.remove("owner");
@@ -316,28 +315,24 @@ public class TaskManager {
 
 	}
 
-	private static void updateToDB(Context context, Task task, float posX,
+	/**
+	 * 
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param task
+	 * @param posX
+	 * @param posY
+	 * @param status
+	 * @throws ParseException
+	 */
+	private static void updateToDB(Context context, String taskId, float posX,
 			float posY, int status) throws ParseException {
 
-		// TaskDB taskDB = new TaskDB(context);
-		//
-		// SQLiteDatabase db = taskDB.getWritableDatabase();
-		//
-		// ContentValues values = new ContentValues();
-		// values.put("POS_X", posX);
-		// values.put("POS_Y", posY);
-		// values.put("STATUS", status);
-		//
-		// // Which row to update, based on the ID
-		// String selection = "TASK_ID LIKE ?";
-		// String[] selectionArgs = { taskId };
-		//
-		// int count = db.update(TaskDB.TABLE_NAME, values, selection,
-		// selectionArgs);
+		// ParseObject parseObject = task.getParseObject();
 
-		ParseObject parseObject = task.getParseObject();
-
-		// TODO : sync or lock before updating
+		// we want to update fresh copy
+		ParseObject parseObject = loadFromDB(context, taskId);
 
 		parseObject.put("posX", posX);
 		parseObject.put("posY", posY);
@@ -347,28 +342,22 @@ public class TaskManager {
 
 	}
 
-	private static void updateToDB(Context context, Task task, String title,
-			String desc) throws ParseException {
+	/**
+	 * 
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param task
+	 * @param title
+	 * @param desc
+	 * @throws ParseException
+	 */
+	private static void updateToDB(Context context, String taskId,
+			String title, String desc) throws ParseException {
 
-		// TaskDB taskDB = new TaskDB(context);
-		//
-		// SQLiteDatabase db = taskDB.getWritableDatabase();
-		//
-		// ContentValues values = new ContentValues();
-		// // values.put("TASK_ID", task.getId());
-		// values.put("TITLE", title);
-		// values.put("DESC", desc);
-		//
-		// // Which row to update, based on the ID
-		// String selection = "TASK_ID LIKE ?";
-		// String[] selectionArgs = { id };
-		//
-		// int count = db.update(TaskDB.TABLE_NAME, values, selection,
-		// selectionArgs);
-
-		ParseObject parseObject = task.getParseObject();
-
-		// TODO : sync or lock before updating
+		// ParseObject parseObject = task.getParseObject();
+		// we want to update fresh copy
+		ParseObject parseObject = loadFromDB(context, taskId);
 
 		parseObject.put("title", title);
 		parseObject.put("description", desc);
@@ -376,64 +365,24 @@ public class TaskManager {
 
 	}
 
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param task
+	 * @throws ParseException
+	 */
 	private static void deleteFromDB(Context context, Task task)
 			throws ParseException {
-		// TaskDB taskDB = new TaskDB(context);
-		//
-		// SQLiteDatabase db = taskDB.getWritableDatabase();
-		//
-		// // Define 'where' part of query.
-		// String selection = "TASK_ID LIKE ?";
-		// // Specify arguments in placeholder order.
-		// String[] selectionArgs = { taskId };
-		// // Issue SQL statement.
-		// db.delete(TaskDB.TABLE_NAME, selection, selectionArgs);
 
-		// TODO : lock first or sync
 		task.getParseObject().delete();
+
 	}
 
 	private static Map<String, Task> getAllFromDB(Context context)
 			throws ParseException {
 
 		Map<String, Task> tasks = new HashMap<String, Task>();
-
-		// TaskDB taskDB = new TaskDB(context);
-		// SQLiteDatabase db = taskDB.getReadableDatabase();
-		//
-		// String[] projection = { "TASK_ID", "TITLE", "DESC", "OWNER", "POS_X",
-		// "POS_Y", "STATUS" };
-		//
-		// Cursor cursor = db.query(TaskDB.TABLE_NAME, // The table to query
-		// projection, // The columns to return
-		// null, // The columns for the WHERE clause
-		// null, // The values for the WHERE clause
-		// null, // don't group the rows
-		// null, // don't filter by row groups
-		// null // The sort order
-		// );
-		//
-		// // Iterate
-		//
-		// cursor.moveToFirst();
-		// while (cursor.isAfterLast() == false) {
-		//
-		// Task task = new Task(cursor.getString(0), cursor.getFloat(4),
-		// cursor.getFloat(5));
-		// task.setTitle(cursor.getString(1));
-		// task.setDescription(cursor.getString(2));
-		// if (cursor.getString(3) != null) {
-		// System.out.println("cursor.getString(3) = = = = = = = = = = "
-		// + cursor.getString(3));
-		//
-		// task.setOwner(MemberManager.load(context, cursor.getString(3)));
-		// }
-		// task.setStatus(cursor.getInt(6));
-		// tasks.put(task.getId(), task);
-		// cursor.moveToNext();
-		// }
-		//
-		// return tasks;
 
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
 
@@ -447,61 +396,36 @@ public class TaskManager {
 			task.setTitle(result.getString("title"));
 			task.setDescription(result.getString("description"));
 			if (result.getString("owner") != null)
-				task.setOwner(MemberManager.load(context,
-						result.getString("owner")));
+				task.setOwner(result.getString("owner"));
 			task.setStatus(result.getInt("status"));
 
 			tasks.put(task.getId(), task);
+
+			// add to cache
+			TaskManager.parseObjects.put(task.getId(), result);
 		}
 
 		return tasks;
 
 	}
 
-	private static Task loadFromDB(Context context, String taskId)
+	/**
+	 * MUST BE RUN IN BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param taskId
+	 * @return
+	 * @throws ParseException
+	 */
+	private static ParseObject loadFromDB(Context context, String taskId)
 			throws ParseException {
-
-		// TaskDB taskDB = new TaskDB(context);
-		// SQLiteDatabase db = taskDB.getReadableDatabase();
-		//
-		// String[] projection = { "TASK_ID", "TITLE", "DESC", "OWNER", "POS_X",
-		// "POS_Y", "STATUS" };
-		//
-		// Cursor cursor = db.query(TaskDB.TABLE_NAME, // The table to query
-		// projection, // The columns to return
-		// "TASK_ID like ?", // The columns for the WHERE clause
-		// new String[] { taskId }, // The values for the WHERE clause
-		// null, // don't group the rows
-		// null, // don't filter by row groups
-		// null // The sort order
-		// );
-		//
-		// // Iterate
-		//
-		// cursor.moveToFirst();
-		// Task task = new Task(cursor.getString(0), cursor.getFloat(4),
-		// cursor.getFloat(5));
-		// task.setTitle(cursor.getString(1));
-		// task.setDescription(cursor.getString(2));
-		// if (cursor.getString(3) != null)
-		// task.setOwner(MemberManager.load(context, cursor.getString(3)));
-		// task.setStatus(cursor.getInt(6));
-		// return task;
 
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
 		query.whereEqualTo("board", Util.getActiveBoard());
 		query.whereEqualTo("id", taskId);
 		ParseObject result = query.getFirst();
 
-		Task task = new Task(result.getString("id"),
-				(float) result.getDouble("posX"),
-				(float) result.getDouble("posY"), result);
-		task.setTitle(result.getString("title"));
-		task.setDescription(result.getString("description"));
-		if (result.getString("owner") != null)
-			task.setOwner(MemberManager.load(context, result.getString("owner")));
-		task.setStatus(result.getInt("status"));
-		return task;
+		return result;
 
 	}
 
@@ -539,5 +463,13 @@ public class TaskManager {
 		stickyLayout.setTag(taskId);
 
 		return stickyLayout;
+	}
+
+	public static void removeOwnerFromTaskStickerUI(String taskId) {
+		// update small task sticker
+		View smallTask = Util.whiteboardLayout.findViewWithTag(taskId);
+		TextView smallOwner = (TextView) smallTask
+				.findViewById(R.id.taskDetailOwner);
+		smallOwner.setText(null);
 	}
 }

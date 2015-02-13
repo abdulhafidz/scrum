@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,6 +25,8 @@ public class Util {
 	public static String VERSION = "0.1";
 	public static ImageView garbage;
 	public static RelativeLayout whiteboardLayout;
+	public static SwipeRefreshLayout mainLayout;
+	public static MainActivity mainActivity;
 
 	// public static int toPixels(Context context, float dp) {
 	// DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -101,11 +104,18 @@ public class Util {
 
 	public static String getActiveBoard() {
 		// return "abdulhafidz@gmail.com";
+		// return "FAUZAMAN@HP";
 		return "ETHAN@HP";
 	}
 
 	public static void showError(Context context, String msg) {
-		Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+		Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+
+	}
+
+	public static void showSuccess(Context context, String msg) {
+		Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
 	}
 
 	public static void showGuide(Context context) {
@@ -115,6 +125,27 @@ public class Util {
 				.setMessage("This is a collaborative app where scrum team can view and update the same scrum board in real-time (sort of).\n\n- Long click on empty space to create task.\n\n- Long click on empty space on far left panel to add member.\n\n- Long click and drag member to task sticker to assign owner.\n\n- In view task dialog, long click and drag the owner out to unassign owner.\n\n- Drag sticker to the bin to remove it.\n\n- Swipe down the board to refresh.");
 		dialogBuilder.setNegativeButton(android.R.string.ok, null);
 		dialogBuilder.create().show();
+	}
+
+	public static void showAbout(Context context) {
+		AlertDialog.Builder dialogBuilder = new Builder(context);
+		dialogBuilder.setTitle("About Scrum Board " + VERSION);
+		dialogBuilder
+				.setMessage("Interested? Any bugs, Comments or Suggestions?\n\nPlease email to \n\nabdulhafidz@gmail.com");
+		dialogBuilder.setNegativeButton(android.R.string.ok, null);
+		dialogBuilder.create().show();
+	}
+
+	public static void startLoading() {
+		mainLayout.setRefreshing(true);
+	}
+
+	public static void stopLoading() {
+		mainLayout.setRefreshing(false);
+	}
+
+	public static void reloadStickers() {
+		mainActivity.reloadStickers();
 	}
 
 }
