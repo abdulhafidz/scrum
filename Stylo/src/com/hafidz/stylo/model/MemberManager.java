@@ -49,12 +49,28 @@ public class MemberManager {
 	public static void releaseLock(String taskId) {
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!
+	 * 
+	 * @param context
+	 * @param memberName
+	 * @param y
+	 * @throws ParseException
+	 */
 	public static void moved(Context context, String memberName, float y)
 			throws ParseException {
 
 		updateToDB(context, memberName, y);
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!
+	 * 
+	 * @param context
+	 * @param name
+	 * @return
+	 * @throws ParseException
+	 */
 	public static Member load(Context context, String name)
 			throws ParseException {
 		return loadFromDB(context, name);
@@ -65,11 +81,17 @@ public class MemberManager {
 
 		deleteFromDB(context, name);
 
-		Util.whiteboardLayout.findViewWithTag(name).setVisibility(View.GONE);
-
-		Toast.makeText(context, name + " removed.", Toast.LENGTH_SHORT).show();
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!
+	 * 
+	 * @param context
+	 * @param oriName
+	 * @param newName
+	 * @param email
+	 * @throws ParseException
+	 */
 	public static void updateMember(Context context, String oriName,
 			String newName, String email) throws ParseException {
 
@@ -86,49 +108,15 @@ public class MemberManager {
 					member.getPosY(), null);
 			add(context, newMember);
 
-			// // reassign task to new member
-			// if (TaskManager.allTasks != null) {
-			// for (Entry<String, Task> taskEntry : TaskManager.allTasks
-			// .entrySet()) {
-			// if (taskEntry.getValue().getOwner().equals(oriName)) {
-			// TaskManager.obtainLock(taskEntry.getValue().getId());
-			// taskEntry.getValue().setOwner(newName);
-			// TaskManager.releaseLock(taskEntry.getValue().getId());
-			// }
-			// }
-			// }
-
 			// delete old member
 			remove(context, oriName);
 
-			// update UI
-			GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
-					.findViewWithTag(oriName);
-			TextView memberName = (TextView) memberSticker
-					.findViewById(R.id.memberName);
-			memberName.setText(newName);
-			memberSticker.setTag(newName);
-
-			// show back removed UI because......
-			memberSticker.setVisibility(View.VISIBLE);
 		}
 
 	}
 
 	private static void saveToDB(Context context, Member member)
 			throws ParseException {
-
-		// MemberDB memberDB = new MemberDB(context);
-		//
-		// SQLiteDatabase db = memberDB.getWritableDatabase();
-		//
-		// ContentValues values = new ContentValues();
-		// values.put("NAME", member.getName());
-		// values.put("EMAIL", member.getEmail());
-		// values.put("POS_Y", member.getPosY());
-		//
-		// long newRowId;
-		// newRowId = db.insert(MemberDB.TABLE_NAME, null, values);
 
 		// push to server
 		ParseObject testObject = new ParseObject("Member");
@@ -145,21 +133,16 @@ public class MemberManager {
 
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!
+	 * 
+	 * @param context
+	 * @param memberName
+	 * @param email
+	 * @throws ParseException
+	 */
 	private static void updateToDB(Context context, String memberName,
 			String email) throws ParseException {
-
-		// MemberDB memberDB = new MemberDB(context);
-		// SQLiteDatabase db = memberDB.getWritableDatabase();
-		//
-		// ContentValues values = new ContentValues();
-		// values.put("EMAIL", email);
-		//
-		// // Which row to update, based on the ID
-		// String selection = "NAME LIKE ?";
-		// String[] selectionArgs = { memberName };
-		//
-		// int count = db.update(MemberDB.TABLE_NAME, values, selection,
-		// selectionArgs);
 
 		Member member = load(context, memberName);
 
@@ -167,26 +150,20 @@ public class MemberManager {
 
 		// member.getParseObject().save();
 		Util.startLoading();
-		member.getParseObject().saveInBackground(
-				new MemberSaveCallback(member, context));
+		member.getParseObject().save();
 
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!
+	 * 
+	 * @param context
+	 * @param memberName
+	 * @param posY
+	 * @throws ParseException
+	 */
 	private static void updateToDB(Context context, String memberName,
 			float posY) throws ParseException {
-
-		// MemberDB memberDB = new MemberDB(context);
-		// SQLiteDatabase db = memberDB.getWritableDatabase();
-		//
-		// ContentValues values = new ContentValues();
-		// values.put("POS_Y", posY);
-		//
-		// // Which row to update, based on the ID
-		// String selection = "NAME LIKE ?";
-		// String[] selectionArgs = { memberName };
-		//
-		// int count = db.update(MemberDB.TABLE_NAME, values, selection,
-		// selectionArgs);
 
 		Member member = load(context, memberName);
 
@@ -194,23 +171,19 @@ public class MemberManager {
 
 		// member.getParseObject().save();
 		Util.startLoading();
-		member.getParseObject().saveInBackground(
-				new MemberSaveCallback(member, context));
+		member.getParseObject().save();
 
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!
+	 * 
+	 * @param context
+	 * @param memberName
+	 * @throws ParseException
+	 */
 	private static void deleteFromDB(Context context, String memberName)
 			throws ParseException {
-		// MemberDB taskDB = new MemberDB(context);
-		//
-		// SQLiteDatabase db = taskDB.getWritableDatabase();
-		//
-		// // Define 'where' part of query.
-		// String selection = "NAME LIKE ?";
-		// // Specify arguments in placeholder order.
-		// String[] selectionArgs = { memberName };
-		// // Issue SQL statement.
-		// db.delete(MemberDB.TABLE_NAME, selection, selectionArgs);
 
 		Member member = load(context, memberName);
 
@@ -218,38 +191,17 @@ public class MemberManager {
 
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @return
+	 * @throws ParseException
+	 */
 	private static Map<String, Member> getAllFromDB(Context context)
 			throws ParseException {
 
 		Map<String, Member> members = new HashMap<String, Member>();
-
-		// MemberDB taskDB = new MemberDB(context);
-		// SQLiteDatabase db = taskDB.getReadableDatabase();
-		//
-		// String[] projection = { "NAME", "EMAIL", "POS_Y" };
-		//
-		// Cursor cursor = db.query(MemberDB.TABLE_NAME, // The table to query
-		// projection, // The columns to return
-		// null, // The columns for the WHERE clause
-		// null, // The values for the WHERE clause
-		// null, // don't group the rows
-		// null, // don't filter by row groups
-		// null // The sort order
-		// );
-		//
-		// // Iterate
-		//
-		// cursor.moveToFirst();
-		// while (cursor.isAfterLast() == false) {
-		//
-		// Member member = new Member(cursor.getString(0),
-		// cursor.getString(1), false, cursor.getFloat(2));
-		//
-		// members.put(member.getName(), member);
-		// cursor.moveToNext();
-		// }
-		//
-		// return members;
 
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
 		query.whereEqualTo("board", Util.getActiveBoard());
@@ -266,43 +218,16 @@ public class MemberManager {
 
 	}
 
+	/**
+	 * MUST BE CALL FROM A BACKGROUND THREAD!!!!
+	 * 
+	 * @param context
+	 * @param name
+	 * @return
+	 * @throws ParseException
+	 */
 	private static Member loadFromDB(Context context, String name)
 			throws ParseException {
-
-		// MemberDB memberDB = new MemberDB(context);
-		// SQLiteDatabase db = memberDB.getReadableDatabase();
-		//
-		// String[] projection = { "NAME", "EMAIL", "POS_Y" };
-		//
-		// Cursor cursor = db.query(MemberDB.TABLE_NAME, // The table to query
-		// projection, // The columns to return
-		// "NAME like ?", // The columns for the WHERE clause
-		// new String[] { name }, // The values for the WHERE clause
-		// null, // don't group the rows
-		// null, // don't filter by row groups
-		// null // The sort order
-		// );
-		//
-		// // Iterate
-		//
-		// System.out.println("cursor.getCount() = = = = " + cursor.getCount());
-		//
-		// // /////
-		// // for(Entry<String,Member>ent : getAllFromDB(context).entrySet())
-		// // {
-		// // System.out.println("ent.getValue().getName() = = = " +
-		// // ent.getValue().getName());
-		// // }
-		// // /////
-		//
-		// cursor.moveToFirst();
-		//
-		// if (cursor.isFirst())
-		// return new Member(cursor.getString(0), cursor.getString(1), false,
-		// cursor.getFloat(2));
-		//
-		// else
-		// return null;
 
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
 		query.whereEqualTo("board", Util.getActiveBoard());
@@ -317,7 +242,7 @@ public class MemberManager {
 
 	}
 
-	public static void createNewSticker(Context context, float y,
+	public static void UIcreateNewSticker(Context context, float y,
 			String memberName) {
 
 		GridLayout memberSticker = (GridLayout) LayoutInflater.from(context)
@@ -327,9 +252,6 @@ public class MemberManager {
 		TextView memberNameView = (TextView) memberSticker
 				.findViewById(R.id.memberName);
 		memberNameView.setText(memberName);
-
-		// memberLayout.setHeight(toPixelsHeight(10));
-		// memberLayout.setWidth(toPixelsWidth(7));
 
 		LayoutParams memberLayoutParams = new LayoutParams(Util.toPixelsWidth(
 				context, 8), 75);
@@ -348,6 +270,5 @@ public class MemberManager {
 
 		Util.whiteboardLayout.addView(memberSticker);
 
-		// return memberSticker;
 	}
 }

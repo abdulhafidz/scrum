@@ -275,7 +275,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 			for (Entry<String, Member> entry : members.entrySet()) {
 				Member member = entry.getValue();
 
-				MemberManager.createNewSticker(getApplicationContext(),
+				MemberManager.UIcreateNewSticker(getApplicationContext(),
 						member.getPosY(), member.getName());
 
 			}
@@ -291,7 +291,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 				TaskManager.updateSticker(sticker, task.getTitle(),
 						task.getDescription());
 				if (task.getOwner() != null) {
-					TaskManager.updateStickerOwner(sticker, task.getOwner(),
+					TaskManager.uiUpdateStickerOwner(sticker, task.getOwner(),
 							null);
 
 					// remove from members pool

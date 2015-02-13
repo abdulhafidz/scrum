@@ -1,29 +1,27 @@
 package com.hafidz.stylo;
 
-import com.hafidz.stylo.model.Member;
-import com.hafidz.stylo.model.MemberManager;
-import com.hafidz.stylo.model.Task;
-import com.hafidz.stylo.model.TaskManager;
-import com.parse.ParseException;
-
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
 import android.view.View.OnClickListener;
 import android.view.View.OnDragListener;
 import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.hafidz.stylo.async.LoadMemberAsyncTask;
+import com.hafidz.stylo.model.Member;
+import com.hafidz.stylo.model.MemberManager;
+import com.parse.ParseException;
 
 public class MemberListener implements OnDragListener, OnLongClickListener,
 		OnClickListener {
@@ -49,29 +47,6 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 		return false;
 	}
 
-	// @Override
-	// public boolean onTouch(View v, MotionEvent event) {
-	// switch (event.getAction()) {
-	//
-	// case MotionEvent.ACTION_DOWN:
-	//
-	// System.out.println("* * * * * start touch member");
-	//
-	// // shadow
-	// View.DragShadowBuilder shadow = new DragShadowBuilder(v);
-	//
-	// // hide ori post it
-	// // v.setVisibility(View.INVISIBLE);
-	//
-	// // start drag
-	// v.startDrag(null, shadow, v, 0);
-	// break;
-	//
-	// }
-	//
-	// return true;
-	// }
-
 	@Override
 	public boolean onLongClick(View v) {
 		System.out.println("* * * * * start touch member");
@@ -90,6 +65,8 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 		return true;
 	}
 
+	private AlertDialog viewDialog;
+
 	@Override
 	public void onClick(View view) {
 
@@ -98,22 +75,56 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 		String memberId = ((TextView) memberSticker
 				.findViewById(R.id.memberName)).getText().toString();
 
-		try {
-			Member member = MemberManager.load(context, memberId);
+		// ////////////////////////////
+		AsyncTask<String, Void, Member> bgTask = new AsyncTask<String, Void, Member>() {
+			@Override
+			protected void onPreExecute() {
+				Util.startLoading();
+			}
 
-			AlertDialog.Builder builder = new AlertDialog.Builder(context);
-			builder.setTitle(member.getName());
-			builder.setMessage(member.getEmail());
+			@Override
+			protected Member doInBackground(String... args) {
+				Member member = null;
 
-			builder.setNegativeButton("Close", null);
-			builder.setPositiveButton("Edit", new onClickEditButtonListener(
-					memberId));
+				try {
+					member = MemberManager.load(context, args[0]);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 
-			AlertDialog dialog = builder.create();
-			dialog.show();
-		} catch (ParseException e) {
-			Util.showError(context, "Problem retrieving from server.");
-		}
+				return member;
+			}
+
+			@Override
+			protected void onPostExecute(Member member) {
+				Util.stopLoading();
+
+				if (member != null) {
+					viewDialog.setTitle(member.getName());
+					viewDialog.setMessage(member.getEmail());
+					viewDialog.getButton(Dialog.BUTTON_POSITIVE).setEnabled(
+							true);
+				} else {
+					viewDialog.dismiss();
+					Util.showError(context, "Member cannot be found.");
+				}
+			}
+		};
+
+		bgTask.execute(memberId);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle("...");
+		builder.setMessage("...");
+
+		builder.setNegativeButton("Close", null);
+		builder.setPositiveButton("Edit", new onClickEditButtonListener(
+				memberId));
+
+		viewDialog = builder.create();
+		viewDialog.show();
+
+		viewDialog.getButton(Dialog.BUTTON_POSITIVE).setEnabled(false);
 
 	}
 
@@ -141,8 +152,6 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 	public static void showEditDialog(Context context, String memberName,
 			boolean firstTime) throws ParseException {
 
-		Member member = MemberManager.load(context, memberName);
-
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
 		LayoutInflater inflater = (LayoutInflater) context
@@ -159,10 +168,22 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 				null, firstTime, context));
 
 		// pre-populate with value
-		((EditText) editMemberLayout.findViewById(R.id.memberEditName))
-				.setText(member.getName());
-		((EditText) editMemberLayout.findViewById(R.id.memberEditEmail))
-				.setText(member.getEmail());
+		if (!firstTime) {
+			((EditText) editMemberLayout.findViewById(R.id.memberEditName))
+					.setText("...");
+			((EditText) editMemberLayout.findViewById(R.id.memberEditEmail))
+					.setText("...");
+		}
+
+		if (!firstTime) {
+			((EditText) editMemberLayout.findViewById(R.id.memberEditName))
+					.setEnabled(false);
+			((EditText) editMemberLayout.findViewById(R.id.memberEditEmail))
+					.setEnabled(false);
+		}
+
+		// ((EditText) editMemberLayout.findViewById(R.id.memberEditEmail))
+		// .setOnFocusChangeListener(new MemberListener(context));
 
 		if (firstTime)
 			((EditText) editMemberLayout.findViewById(R.id.memberEditName))
@@ -177,5 +198,22 @@ public class MemberListener implements OnDragListener, OnLongClickListener,
 		Button theButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
 		theButton.setOnClickListener(new MemberEditListener(memberName, dialog,
 				firstTime, context));
+		if (!firstTime) {
+			theButton.setEnabled(false);
+		}
+
+		// add focus listener to validate name
+		((EditText) editMemberLayout.findViewById(R.id.memberEditName))
+				.setOnFocusChangeListener(new MemberEditListener(memberName,
+						dialog, firstTime, context));
+
+		// ///////////////////////////////////
+		if (!firstTime) {
+			AsyncTask<Object, Void, Member> bgTask = new LoadMemberAsyncTask(
+					context, dialog);
+			bgTask.execute(memberName, context);
+		}
+		// //////////////////////////////////
 	}
+
 }

@@ -1,6 +1,7 @@
 package com.hafidz.stylo;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -66,7 +67,7 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 						- MEMBER_Y_OFFSET, null);
 				MemberManager.add(context, member);
 
-				MemberManager.createNewSticker(context, wbTouchY
+				MemberManager.UIcreateNewSticker(context, wbTouchY
 						- MEMBER_Y_OFFSET, memberName);
 
 				MemberListener.showEditDialog(context, memberName, true);
@@ -193,26 +194,55 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 				if (event.getX() <= toPixelsWidth(10) && event.getY() > 70) {
 
-					try {
-						MemberManager.moved(context,
-								(String) memberText.getTag(), event.getY()
-										- MEMBER_Y_OFFSET);
+					AsyncTask<Object, Void, ParseException> bgTask = new AsyncTask<Object, Void, ParseException>() {
+						@Override
+						protected void onPreExecute() {
+							Util.startLoading();
+						}
 
-						// new member location
-						memberText.setX(toPixelsWidth(1));
-						memberText.setY(event.getY() - MEMBER_Y_OFFSET);
+						@Override
+						protected ParseException doInBackground(Object... args) {
+							try {
+								MemberManager.moved(context, (String) args[0],
+										(Float) args[1] - MEMBER_Y_OFFSET);
+							} catch (ParseException e) {
+								return e;
+							}
 
-						memberText.bringToFront();
+							return null;
+						}
 
-						memberText.setVisibility(View.VISIBLE);
+						@Override
+						protected void onPostExecute(ParseException exception) {
+							Util.stopLoading();
+							// no error
+							if (exception == null) {
+								Util.showSuccess(context,
+										"Member updated to the server.");
+							}
+							// got error
+							else {
+								Util.showError(context,
+										"Problem updating member to the server.");
+								Util.reloadStickers();
+							}
+						}
+					};
 
-						System.out
-								.println("* * * * * non sticky dropped on member section");
+					bgTask.execute((String) memberText.getTag(), event.getY());
 
-						return true;
-					} catch (ParseException e) {
-						Util.showError(context, "Problem updating server.");
-					}
+					// /////////////////
+
+					// new member location
+					memberText.setX(toPixelsWidth(1));
+					memberText.setY(event.getY() - MEMBER_Y_OFFSET);
+
+					memberText.bringToFront();
+
+					memberText.setVisibility(View.VISIBLE);
+
+					return true;
+
 				} else {
 					System.out
 							.println("* * * * * non sticky dropped on whiteboard");

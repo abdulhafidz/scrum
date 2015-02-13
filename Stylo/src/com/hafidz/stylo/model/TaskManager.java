@@ -69,7 +69,7 @@ public class TaskManager {
 		// Toast.LENGTH_SHORT).show();
 	}
 
-	public static void updateStickerOwner(RelativeLayout sticker,
+	public static void uiUpdateStickerOwner(RelativeLayout sticker,
 			String newOwner, GridLayout memberSticker) {
 		// sticky note
 		TextView ownerText = (TextView) sticker
@@ -217,40 +217,40 @@ public class TaskManager {
 
 	}
 
-	/**
-	 * MUST BE RUN IN BACKGROUND THREAD!!!!
-	 * 
-	 * @param context
-	 * @param taskId
-	 * @param taskSticker
-	 * @param ownerName
-	 * @throws ParseException
-	 */
-	public static void freeOwner(Context context, String taskId,
-			RelativeLayout taskSticker, String ownerName) throws ParseException {
-
-		TextView memberName = (TextView) taskSticker
-				.findViewById(R.id.taskDetailOwner);
-		String recoveredMemberName = memberName.getText().toString();
-		memberName.setText(null);
-
-		if (ownerName != null) {
-
-			// task.setOwner(null);
-			updateToDB(context, taskId, null);
-
-			GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
-					.findViewWithTag(recoveredMemberName);
-			memberSticker.setVisibility(View.VISIBLE);
-			memberSticker.findViewById(R.id.memberName).setVisibility(
-					View.VISIBLE);
-
-			// toast
-			Toast.makeText(context, ownerName + " is now free.",
-					Toast.LENGTH_SHORT).show();
-		}
-
-	}
+	// /**
+	// * MUST BE RUN IN BACKGROUND THREAD!!!!
+	// *
+	// * @param context
+	// * @param taskId
+	// * @param taskSticker
+	// * @param ownerName
+	// * @throws ParseException
+	// */
+	// public static void freeOwner(Context context, String taskId,
+	// RelativeLayout taskSticker, String ownerName) throws ParseException {
+	//
+	// TextView memberName = (TextView) taskSticker
+	// .findViewById(R.id.taskDetailOwner);
+	// String recoveredMemberName = memberName.getText().toString();
+	// memberName.setText(null);
+	//
+	// if (ownerName != null) {
+	//
+	// // task.setOwner(null);
+	// updateToDB(context, taskId, null);
+	//
+	// GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
+	// .findViewWithTag(recoveredMemberName);
+	// memberSticker.setVisibility(View.VISIBLE);
+	// memberSticker.findViewById(R.id.memberName).setVisibility(
+	// View.VISIBLE);
+	//
+	// // toast
+	// Toast.makeText(context, ownerName + " is now free.",
+	// Toast.LENGTH_SHORT).show();
+	// }
+	//
+	// }
 
 	/**
 	 * MUST BE RUN IN BACKGROUND THREAD!!!!

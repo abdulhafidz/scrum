@@ -9,9 +9,8 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.hafidz.stylo.model.MemberManager;
+import com.hafidz.stylo.async.DeleteMemberAsyncTask;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
 import com.parse.ParseException;
@@ -37,17 +36,13 @@ public class GarbageListener implements OnDragListener {
 				Util.hideGarbage();
 				garbage.setColorFilter(null);
 
-				try {
-					TextView tv = (TextView) memberSticker
-							.findViewById(R.id.memberName);
-					String name = tv.getText().toString();
+				TextView tv = (TextView) memberSticker
+						.findViewById(R.id.memberName);
+				String name = tv.getText().toString();
 
-					MemberManager.obtainLock(name);
-					MemberManager.remove(context, name);
-					MemberManager.releaseLock(name);
-				} catch (ParseException e) {
-					Util.showError(context, "Problem updating server.");
-				}
+				DeleteMemberAsyncTask bgTask = new DeleteMemberAsyncTask(
+						context, name);
+				bgTask.execute();
 
 				break;
 
@@ -62,8 +57,7 @@ public class GarbageListener implements OnDragListener {
 			case DragEvent.ACTION_DRAG_EXITED:
 
 				garbage.setColorFilter(null);
-				System.out
-						.println("exited = = = = = = = == = = = = = = = = = = == = = = = = == = = ==");
+
 				break;
 			}
 
@@ -96,22 +90,19 @@ public class GarbageListener implements OnDragListener {
 			case DragEvent.ACTION_DRAG_ENTERED:
 
 				garbage.setColorFilter(Color.parseColor("#F44336"));
-				System.out
-						.println("entered = = = = = = = == = = = = = = = = = = == = = = = = == = = ==");
+
 				break;
 
 			case DragEvent.ACTION_DRAG_EXITED:
 
 				garbage.setColorFilter(null);
-				System.out
-						.println("exited = = = = = = = == = = = = = = = = = = == = = = = = == = = ==");
+
 				break;
 			}
 
 			return true;
 		}
 
-		// non member
 		return false;
 	}
 

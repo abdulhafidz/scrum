@@ -39,8 +39,8 @@ public class MemberSaveCallback extends SaveCallback {
 				@Override
 				public void run() {
 					Util.stopLoading();
-					Util.showSuccess(context, "Member (" + member.getName()
-							+ ") saved to the server.");
+					// Util.showSuccess(context, "Member (" + member.getName()
+					// + ") saved to server.");
 
 				}
 			});

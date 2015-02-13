@@ -104,7 +104,7 @@ public class TaskStickerListener implements OnDragListener,
 						+ " dropped to task");
 
 				// task sticker and member sticker UI
-				TaskManager.updateStickerOwner(taskSticker, newOwner,
+				TaskManager.uiUpdateStickerOwner(taskSticker, newOwner,
 						memberLayout);
 
 				break;
