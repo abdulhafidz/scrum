@@ -19,11 +19,13 @@ public class TaskSaveCallback extends SaveCallback {
 
 	// private Task task;
 	private Context context;
+	private String taskId;
 
-	public TaskSaveCallback(Context context) {
+	public TaskSaveCallback(Context context, String taskId) {
 		super();
 		// this.task = task;
 		this.context = context;
+		this.taskId = taskId;
 	}
 
 	@Override
@@ -33,6 +35,9 @@ public class TaskSaveCallback extends SaveCallback {
 					(MainActivity) context));
 
 		} else {
+
+			TaskManager.push(taskId, TaskManager.PUSH_ACTION_CREATE,
+					"New empty task created.");
 
 			((Activity) context).runOnUiThread(new Runnable() {
 

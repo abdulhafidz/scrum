@@ -6,12 +6,10 @@ package com.hafidz.stylo.push;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.view.View;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hafidz.stylo.MainActivity;
@@ -28,39 +26,40 @@ import com.parse.ParsePushBroadcastReceiver;
  */
 public class PushReceiver extends ParsePushBroadcastReceiver {
 
+	// what if this class is singleton???!!
+	private Context myContext;
 	private String id;
-	private String oriOwner;
+	private int action;
+	private JSONObject json;
 
 	@Override
 	protected void onPushReceive(Context context, Intent intent) {
 
+		myContext = context;
+
 		try {
 			String jsonData = intent.getExtras().getString("com.parse.Data");
 
-			JSONObject json = new JSONObject(jsonData);
+			json = new JSONObject(jsonData);
 
 			String type = json.getString("type");
 			id = json.getString("id");
 
-			// for delete
-			if (!json.isNull("oriOwner"))
-				oriOwner = json.getString("oriOwner");
+			action = json.getInt("action");
 
 			// update UI
 			if (!MainActivity.onBackground) {
 				// if (true) {
 
-				Util.showSuccess(context, "Just in: " + json.getString("msg"));
+				Util.showSuccess(context,
+						"Incoming Push: " + json.getString("msg"));
 
 				if ("TASK".equals(type)) {
 
-					// find small sticker
-					RelativeLayout taskSticker = (RelativeLayout) Util.whiteboardLayout
-							.findViewWithTag(id);
+					switch (action) {
 
-					if (taskSticker != null) {
-
-						AsyncTask<String, Void, Task> bgTask = new AsyncTask<String, Void, Task>() {
+					case TaskManager.PUSH_ACTION_CREATE:
+						AsyncTask<String, Void, Task> bgTaskCreate = new AsyncTask<String, Void, Task>() {
 							@Override
 							protected void onPreExecute() {
 								Util.startLoading();
@@ -70,10 +69,10 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 							protected Task doInBackground(String... args) {
 								try {
 
-									return TaskManager.load(Util.mainActivity
-											.getApplicationContext(), id);
+									return TaskManager.load(myContext, id);
 								} catch (ParseException e) {
 									e.printStackTrace();
+
 								}
 
 								return null;
@@ -81,13 +80,81 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 
 							@Override
 							protected void onPostExecute(Task task) {
+
 								Util.stopLoading();
 
 								if (task != null) {
+									TaskManager.createEmptySticker(
+											myContext,
+											Util.toPixelsWidth(myContext,
+													task.getPosX()),
+											task.getPosY(), task.getId());
+								}
+
+							}
+						};
+
+						bgTaskCreate.execute();
+						break;
+
+					case TaskManager.PUSH_ACTION_DELETE:
+						View taskSticker = Util.whiteboardLayout
+								.findViewWithTag(id);
+						if (taskSticker != null) {
+							Util.whiteboardLayout.removeView(taskSticker);
+						}
+
+						// free owner
+						if (json.has("oriOwner")) {
+							String oriOwner = json.getString("oriOwner");
+							if (oriOwner != null) {
+								View memberSticker = Util.whiteboardLayout
+										.findViewWithTag(oriOwner);
+								if (memberSticker != null) {
+									memberSticker.setVisibility(View.VISIBLE);
+								}
+							}
+						}
+						break;
+
+					case TaskManager.PUSH_ACTION_MOVE:
+					case TaskManager.PUSH_ACTION_UPDATE_DETAILS:
+					case TaskManager.PUSH_ACTION_UPDATE_OWNER:
+
+						AsyncTask<String, Void, Task> bgTaskUpdate = new AsyncTask<String, Void, Task>() {
+							@Override
+							protected void onPreExecute() {
+								Util.startLoading();
+							}
+
+							@Override
+							protected Task doInBackground(String... args) {
+								try {
+
+									return TaskManager.load(myContext, id);
+								} catch (ParseException e) {
+									e.printStackTrace();
+
+								}
+
+								return null;
+							}
+
+							@Override
+							protected void onPostExecute(Task task) {
+
+								Util.stopLoading();
+
+								if (task != null) {
+
 									// update UI
-									View taskSticker = Util.whiteboardLayout
+									View taskSticker = null;
+
+									taskSticker = Util.whiteboardLayout
 											.findViewWithTag(task.getId());
+
 									if (taskSticker != null) {
+
 										// details
 										TextView titleTV = (TextView) taskSticker
 												.findViewById(R.id.smallTaskTitle);
@@ -95,80 +162,65 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 										TextView descTV = (TextView) taskSticker
 												.findViewById(R.id.smallTaskDesc);
 										descTV.setText(task.getDescription());
-										TextView ownerTV = (TextView) taskSticker
-												.findViewById(R.id.taskDetailOwner);
-										ownerTV.setText(task.getOwner());
 
-										// remove owner from pool
-										if (task.getOwner() != null) {
-											View memberSticker = Util.whiteboardLayout
-													.findViewWithTag(task
-															.getOwner());
-											if (memberSticker != null) {
-												memberSticker
-														.setVisibility(View.GONE);
+										// postition
+										taskSticker.setY(task.getPosY());
+										taskSticker.setX(Util.toPixelsWidth(
+												myContext, task.getPosX()));
+
+										if (TaskManager.PUSH_ACTION_UPDATE_OWNER == action) {
+
+											System.out
+													.println("task.getOwner() = = = = "
+															+ task.getOwner());
+
+											TextView ownerTV = (TextView) taskSticker
+													.findViewById(R.id.taskDetailOwner);
+											ownerTV.setText(task.getOwner());
+
+											// remove owner from pool
+											if (task.getOwner() != null) {
+												View memberSticker = Util.whiteboardLayout
+														.findViewWithTag(task
+																.getOwner());
+												if (memberSticker != null) {
+													memberSticker
+															.setVisibility(View.GONE);
+												}
+
+											}
+											// add member back to pool
+											else {
+												if (json.has("oriOwner")) {
+													try {
+														String oriOwner = json
+																.getString("oriOwner");
+														System.out
+																.println("oriOwner = = = "
+																		+ oriOwner);
+														View memberSticker = Util.whiteboardLayout
+																.findViewWithTag(oriOwner);
+														if (memberSticker != null) {
+															memberSticker
+																	.setVisibility(View.VISIBLE);
+														}
+													} catch (JSONException e) {
+														e.printStackTrace();
+													}
+												}
 											}
 
 										}
 
-										// postition
-										taskSticker.setY(task.getPosY());
-										taskSticker
-												.setX(Util.toPixelsWidth(
-														Util.mainActivity
-																.getApplicationContext(),
-														task.getPosX()));
-									}
-									// create new sticker
-									else {
-										// FIXME : not working
-										taskSticker = TaskManager
-												.createEmptySticker(
-														Util.mainActivity
-																.getApplicationContext(),
-														Util.toPixelsWidth(
-																Util.mainActivity
-																		.getApplicationContext(),
-																task.getPosX()),
-														task.getPosY(), task
-																.getId());
-
-										// why is this not working
-
-										// TextView titleTV = (TextView)
-										// taskSticker
-										// .findViewById(R.id.smallTaskTitle);
-										// titleTV.setText(task.getTitle());
-										// TextView descTV = (TextView)
-										// taskSticker
-										// .findViewById(R.id.smallTaskDesc);
-										// descTV.setText(task.getDescription());
-										// Util.whiteboardLayout
-										// .addView(taskSticker);
-
 									}
 
-								} else {
-									// delete
-									View taskSticker = Util.whiteboardLayout
-											.findViewWithTag(id);
-									if (taskSticker != null) {
-										Util.whiteboardLayout
-												.removeView(taskSticker);
-									}
-
-									// free owner
-									View memberSticker = Util.whiteboardLayout
-											.findViewWithTag(oriOwner);
-									if (memberSticker != null) {
-										memberSticker
-												.setVisibility(View.VISIBLE);
-									}
 								}
 							}
 						};
 
-						bgTask.execute();
+						bgTaskUpdate.execute();
+						break;
+
 					}
 
 				} else if ("MEMBER".equals(type)) {
@@ -177,7 +229,7 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 			}
 
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 

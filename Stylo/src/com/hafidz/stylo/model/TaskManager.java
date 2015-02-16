@@ -31,6 +31,13 @@ public class TaskManager {
 	// cache
 	public static Map<String, ParseObject> parseObjects = new HashMap<String, ParseObject>();
 
+	// push
+	public static final int PUSH_ACTION_CREATE = 1;
+	public static final int PUSH_ACTION_DELETE = 0;
+	public static final int PUSH_ACTION_MOVE = 2;
+	public static final int PUSH_ACTION_UPDATE_DETAILS = 3;
+	public static final int PUSH_ACTION_UPDATE_OWNER = 4;
+
 	public static Map<String, Task> getAll(Context context)
 			throws ParseException {
 		return getAllFromDB(context);
@@ -223,41 +230,6 @@ public class TaskManager {
 
 	}
 
-	// /**
-	// * MUST BE RUN IN BACKGROUND THREAD!!!!
-	// *
-	// * @param context
-	// * @param taskId
-	// * @param taskSticker
-	// * @param ownerName
-	// * @throws ParseException
-	// */
-	// public static void freeOwner(Context context, String taskId,
-	// RelativeLayout taskSticker, String ownerName) throws ParseException {
-	//
-	// TextView memberName = (TextView) taskSticker
-	// .findViewById(R.id.taskDetailOwner);
-	// String recoveredMemberName = memberName.getText().toString();
-	// memberName.setText(null);
-	//
-	// if (ownerName != null) {
-	//
-	// // task.setOwner(null);
-	// updateToDB(context, taskId, null);
-	//
-	// GridLayout memberSticker = (GridLayout) Util.whiteboardLayout
-	// .findViewWithTag(recoveredMemberName);
-	// memberSticker.setVisibility(View.VISIBLE);
-	// memberSticker.findViewById(R.id.memberName).setVisibility(
-	// View.VISIBLE);
-	//
-	// // toast
-	// Toast.makeText(context, ownerName + " is now free.",
-	// Toast.LENGTH_SHORT).show();
-	// }
-	//
-	// }
-
 	/**
 	 * MUST BE RUN IN BACKGROUND THREAD!!!!
 	 * 
@@ -273,8 +245,8 @@ public class TaskManager {
 
 	}
 
-	private static void push(String taskId, String msg, String oriOwner,
-			boolean notification) {
+	private static void push(String taskId, int action, String msg,
+			String oriOwner, boolean notification) {
 		// push
 		try {
 			ParsePush push = new ParsePush();
@@ -283,9 +255,10 @@ public class TaskManager {
 			json.put("type", "TASK");
 			json.put("id", taskId);
 			json.put("msg", msg);
+			json.put("action", action);
 
 			if (oriOwner != null)
-				json.put(oriOwner, oriOwner);
+				json.put("oriOwner", oriOwner);
 
 			if (notification) {
 				json.put("title", "Taskboard Updated");
@@ -301,12 +274,13 @@ public class TaskManager {
 		}
 	}
 
-	private static void push(String taskId, String msg) {
-		push(taskId, msg, null, true);
+	public static void push(String taskId, int action, String msg) {
+		push(taskId, action, msg, null, true);
 	}
 
-	private static void push(String taskId, String msg, boolean notification) {
-		push(taskId, msg, null, notification);
+	private static void push(String taskId, int action, String msg,
+			boolean notification) {
+		push(taskId, action, msg, null, notification);
 	}
 
 	private static void saveToDB(Context context, Task task)
@@ -328,10 +302,12 @@ public class TaskManager {
 		// testObject.save();
 
 		Util.startLoading();
-		testObject.saveInBackground(new TaskSaveCallback(context));
+		testObject
+				.saveInBackground(new TaskSaveCallback(context, task.getId()));
 
-		// push
-		push(task.getId(), "New empty task created.");
+		// push (we push in TaskSaveCallback to prevent push before object saved
+		// in server)
+		// push(task.getId(), PUSH_ACTION_CREATE, "New empty task created.");
 
 	}
 
@@ -340,17 +316,17 @@ public class TaskManager {
 	 * MUST BE RUN IN BACKGROUND THREAD!!!!
 	 * 
 	 * @param context
-	 * @param task
+	 * @param taskId
 	 * @param newOwner
 	 * @throws ParseException
 	 */
-	private static void updateToDB(Context context, String task, String newOwner)
+	private static void updateToDB(Context context, String taskId, String newOwner)
 			throws ParseException {
 
 		// ParseObject parseObject = task.getParseObject();
 
 		// we want to update fresh copy
-		ParseObject parseObject = loadFromDB(context, task);
+		ParseObject parseObject = loadFromDB(context, taskId);
 
 		String oldOwner = parseObject.getString("owner");
 		if (newOwner == null) {
@@ -361,7 +337,7 @@ public class TaskManager {
 
 		// push
 
-		String msg;
+		String msg = null;
 		String title = parseObject.getString("title");
 		if (newOwner != null) {
 			if (title != null)
@@ -379,11 +355,13 @@ public class TaskManager {
 					msg = "'" + oldOwner + "' unassigned from task.";
 
 			} else {
-				msg = "Task owner unassigned.";
+				// msg = "Task owner unassigned.";
 			}
 		}
 
-		push(task, msg, oldOwner, true);
+		if (msg != null) {
+			push(taskId, PUSH_ACTION_UPDATE_OWNER, msg, oldOwner, true);
+		}
 
 	}
 
@@ -451,9 +429,9 @@ public class TaskManager {
 		// }
 
 		if (oldStatus != status)
-			push(taskId, "Task moved.");
+			push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.");
 		else
-			push(taskId, "Task moved.", false);
+			push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.", false);
 
 	}
 
@@ -479,8 +457,9 @@ public class TaskManager {
 		parseObject.save();
 
 		// push
-		push(taskId, "Task '" + parseObject.getString("title")
-				+ "' details updated.");
+		push(taskId, PUSH_ACTION_UPDATE_DETAILS,
+				"Task '" + parseObject.getString("title")
+						+ "' details updated.");
 
 	}
 
@@ -498,9 +477,10 @@ public class TaskManager {
 
 		// push
 		if (task.getTitle() != null)
-			push(task.getId(), "Task '" + task.getTitle() + "' removed.");
+			push(task.getId(), PUSH_ACTION_DELETE, "Task '" + task.getTitle()
+					+ "' removed.");
 		else {
-			push(task.getId(), "Task removed.");
+			push(task.getId(), PUSH_ACTION_DELETE, "Task removed.");
 		}
 
 	}
