@@ -38,7 +38,7 @@ public class WhiteBoardScroller extends ScrollView {
 		paint.setStrokeJoin(Paint.Join.ROUND);
 		paint.setStrokeCap(Paint.Cap.ROUND);
 		paint.setAntiAlias(true);
-		paint.setColor(Color.parseColor("#9FA8DA"));
+		paint.setColor(Color.parseColor("#C5CAE9"));
 		paint.setPathEffect(new DashPathEffect(new float[] { 15, 25 }, 0));
 
 		// for dash effect fix, but become lag
@@ -56,7 +56,7 @@ public class WhiteBoardScroller extends ScrollView {
 		// int bottomEnd = toPixelsHeight(98);
 		int bottomEnd = 1980;
 
-		int rightEnd = toPixelsWidth(98);
+		int rightEnd = Math.round(toPixelsWidth(98));
 
 		// lines
 
@@ -90,7 +90,7 @@ public class WhiteBoardScroller extends ScrollView {
 	// return Util.toPixels(context, dp);
 	// }
 
-	int toPixelsWidth(int percentage) {
+	float toPixelsWidth(int percentage) {
 		return Util.toPixelsWidth(context, percentage);
 	}
 

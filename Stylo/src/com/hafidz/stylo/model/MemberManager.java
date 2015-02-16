@@ -262,8 +262,8 @@ public class MemberManager {
 				.findViewById(R.id.memberName);
 		memberNameView.setText(memberName);
 
-		LayoutParams memberLayoutParams = new LayoutParams(Util.toPixelsWidth(
-				context, 8), 75);
+		LayoutParams memberLayoutParams = new LayoutParams(Math.round(Util
+				.toPixelsWidth(context, 8)), 75);
 		memberSticker.setLayoutParams(memberLayoutParams);
 
 		memberSticker.setX(Util.toPixelsWidth(context, 1));

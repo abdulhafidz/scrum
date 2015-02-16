@@ -77,7 +77,7 @@ public class Util {
 		return metrics.heightPixels;
 	}
 
-	public static int toPixelsWidth(Context context, int percentage) {
+	public static float toPixelsWidth(Context context, float percentage) {
 
 		return (percentage) * getScreenWidth(context) / 100;
 

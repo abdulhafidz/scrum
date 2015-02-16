@@ -57,7 +57,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 	private ProgressDialog progress;
 
 	// determine app is foreground or background
-	public static boolean onBackground;
+	public static boolean onBackground = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -174,7 +174,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		}
 	}
 
-	int toPixelsWidth(int percentage) {
+	float toPixelsWidth(int percentage) {
 		return Util.toPixelsWidth(getApplicationContext(), percentage);
 	}
 
@@ -210,7 +210,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		todoText.setTextSize(15);
 		todoText.setTypeface(Typeface.DEFAULT_BOLD);
 		todoText.setTextColor(Color.parseColor("#3F51B5"));
-		todoText.setPaddingRelative(toPixelsWidth(22), textTop, 0, textTop);
+		todoText.setPaddingRelative(Math.round(toPixelsWidth(22)), textTop, 0,
+				textTop);
 		whiteBoardLayout.addView(todoText);
 
 		TextView inProgressText = new TextView(getApplicationContext());
@@ -218,8 +219,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		inProgressText.setTextSize(15);
 		inProgressText.setTypeface(Typeface.DEFAULT_BOLD);
 		inProgressText.setTextColor(Color.parseColor("#3F51B5"));
-		inProgressText.setPaddingRelative(toPixelsWidth(50), textTop, 0,
-				textTop);
+		inProgressText.setPaddingRelative(Math.round(toPixelsWidth(50)),
+				textTop, 0, textTop);
 		whiteBoardLayout.addView(inProgressText);
 
 		TextView doneText = new TextView(getApplicationContext());
@@ -227,7 +228,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		doneText.setTextSize(15);
 		doneText.setTypeface(Typeface.DEFAULT_BOLD);
 		doneText.setTextColor(Color.parseColor("#3F51B5"));
-		doneText.setPaddingRelative(toPixelsWidth(82), textTop, 0, textTop);
+		doneText.setPaddingRelative(Math.round(toPixelsWidth(82)), textTop, 0,
+				textTop);
 		whiteBoardLayout.addView(doneText);
 
 		// load stickers on another thread

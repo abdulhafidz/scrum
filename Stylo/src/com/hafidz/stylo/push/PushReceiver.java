@@ -10,11 +10,13 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.hafidz.stylo.MainActivity;
+import com.hafidz.stylo.R;
 import com.hafidz.stylo.Util;
-import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
 import com.parse.ParseException;
@@ -26,6 +28,9 @@ import com.parse.ParsePushBroadcastReceiver;
  */
 public class PushReceiver extends ParsePushBroadcastReceiver {
 
+	private String id;
+	private String oriOwner;
+
 	@Override
 	protected void onPushReceive(Context context, Intent intent) {
 
@@ -34,13 +39,19 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 
 			JSONObject json = new JSONObject(jsonData);
 
-			Util.showSuccess(context, "Just in: " + json.getString("msg"));
-
 			String type = json.getString("type");
-			String id = json.getString("id");
+			id = json.getString("id");
+
+			// for delete
+			if (!json.isNull("oriOwner"))
+				oriOwner = json.getString("oriOwner");
 
 			// update UI
 			if (!MainActivity.onBackground) {
+				// if (true) {
+
+				Util.showSuccess(context, "Just in: " + json.getString("msg"));
+
 				if ("TASK".equals(type)) {
 
 					// find small sticker
@@ -60,7 +71,7 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 								try {
 
 									return TaskManager.load(Util.mainActivity
-											.getApplicationContext(), args[0]);
+											.getApplicationContext(), id);
 								} catch (ParseException e) {
 									e.printStackTrace();
 								}
@@ -74,16 +85,90 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 
 								if (task != null) {
 									// update UI
+									View taskSticker = Util.whiteboardLayout
+											.findViewWithTag(task.getId());
+									if (taskSticker != null) {
+										// details
+										TextView titleTV = (TextView) taskSticker
+												.findViewById(R.id.smallTaskTitle);
+										titleTV.setText(task.getTitle());
+										TextView descTV = (TextView) taskSticker
+												.findViewById(R.id.smallTaskDesc);
+										descTV.setText(task.getDescription());
+										TextView ownerTV = (TextView) taskSticker
+												.findViewById(R.id.taskDetailOwner);
+										ownerTV.setText(task.getOwner());
 
-									// postition
+										// remove owner from pool
+										if (task.getOwner() != null) {
+											View memberSticker = Util.whiteboardLayout
+													.findViewWithTag(task
+															.getOwner());
+											if (memberSticker != null) {
+												memberSticker
+														.setVisibility(View.GONE);
+											}
+
+										}
+
+										// postition
+										taskSticker.setY(task.getPosY());
+										taskSticker
+												.setX(Util.toPixelsWidth(
+														Util.mainActivity
+																.getApplicationContext(),
+														task.getPosX()));
+									}
+									// create new sticker
+									else {
+										// FIXME : not working
+										taskSticker = TaskManager
+												.createEmptySticker(
+														Util.mainActivity
+																.getApplicationContext(),
+														Util.toPixelsWidth(
+																Util.mainActivity
+																		.getApplicationContext(),
+																task.getPosX()),
+														task.getPosY(), task
+																.getId());
+
+										// why is this not working
+
+										// TextView titleTV = (TextView)
+										// taskSticker
+										// .findViewById(R.id.smallTaskTitle);
+										// titleTV.setText(task.getTitle());
+										// TextView descTV = (TextView)
+										// taskSticker
+										// .findViewById(R.id.smallTaskDesc);
+										// descTV.setText(task.getDescription());
+										// Util.whiteboardLayout
+										// .addView(taskSticker);
+
+									}
 
 								} else {
 									// delete
+									View taskSticker = Util.whiteboardLayout
+											.findViewWithTag(id);
+									if (taskSticker != null) {
+										Util.whiteboardLayout
+												.removeView(taskSticker);
+									}
+
+									// free owner
+									View memberSticker = Util.whiteboardLayout
+											.findViewWithTag(oriOwner);
+									if (memberSticker != null) {
+										memberSticker
+												.setVisibility(View.VISIBLE);
+									}
 								}
 							}
 						};
 
-						bgTask.execute(id);
+						bgTask.execute();
 					}
 
 				} else if ("MEMBER".equals(type)) {
@@ -102,12 +187,6 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 		}
 
 		super.onPushReceive(context, intent);
-	}
-
-	@Override
-	protected Notification getNotification(Context context, Intent intent) {
-
-		return super.getNotification(context, intent);
 	}
 
 }

@@ -294,7 +294,7 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 
 	}
 
-	int toPixelsWidth(int percentage) {
+	float toPixelsWidth(int percentage) {
 		return Util.toPixelsWidth(context, percentage);
 	}
 

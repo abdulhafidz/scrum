@@ -273,7 +273,8 @@ public class TaskManager {
 
 	}
 
-	private static void push(String taskId, String msg) {
+	private static void push(String taskId, String msg, String oriOwner,
+			boolean notification) {
 		// push
 		try {
 			ParsePush push = new ParsePush();
@@ -282,8 +283,14 @@ public class TaskManager {
 			json.put("type", "TASK");
 			json.put("id", taskId);
 			json.put("msg", msg);
-			json.put("title", "Taskboard Updated");
-			json.put("alert", msg);
+
+			if (oriOwner != null)
+				json.put(oriOwner, oriOwner);
+
+			if (notification) {
+				json.put("title", "Taskboard Updated");
+				json.put("alert", msg);
+			}
 
 			// TODO : exclude self
 
@@ -292,6 +299,14 @@ public class TaskManager {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static void push(String taskId, String msg) {
+		push(taskId, msg, null, true);
+	}
+
+	private static void push(String taskId, String msg, boolean notification) {
+		push(taskId, msg, null, notification);
 	}
 
 	private static void saveToDB(Context context, Task task)
@@ -346,26 +361,29 @@ public class TaskManager {
 
 		// push
 
-		String msg = null;
+		String msg;
 		String title = parseObject.getString("title");
 		if (newOwner != null) {
 			if (title != null)
 				msg = "'" + newOwner + "' assigned to task '" + title + "'";
 			else
 				msg = "'" + newOwner + "' assigned to empty task.";
-		} else {
+		}
+		// unassign
+		else {
 			if (oldOwner != null) {
 				if (title != null)
 					msg = "'" + oldOwner + "' unassigned from task '" + title
 							+ "'";
+				else
+					msg = "'" + oldOwner + "' unassigned from task.";
 
 			} else {
-				// hmmm....
+				msg = "Task owner unassigned.";
 			}
 		}
 
-		if (msg != null)
-			push(task, msg);
+		push(task, msg, oldOwner, true);
 
 	}
 
@@ -388,7 +406,7 @@ public class TaskManager {
 		// we want to update fresh copy
 		ParseObject parseObject = loadFromDB(context, taskId);
 
-		// int oldStatus = parseObject.getInt("status");
+		int oldStatus = parseObject.getInt("status");
 
 		// free owner
 		if (status == Task.STATUS_DONE) {
@@ -402,35 +420,40 @@ public class TaskManager {
 		parseObject.save();
 
 		// push
-		String msg = null;
-		String title = parseObject.getString("title");
-		if (title != null) {
-			switch (status) {
-			case Task.STATUS_DONE:
+		// String msg = null;
+		// String title = parseObject.getString("title");
+		// if (title != null) {
+		// switch (status) {
+		// case Task.STATUS_DONE:
+		//
+		// msg = "Task '" + parseObject.getString("title") + "' is done!";
+		// break;
+		//
+		// case Task.STATUS_IN_PROGRESS:
+		//
+		// msg = "Task '" + parseObject.getString("title")
+		// + "' is now in progress.";
+		// break;
+		//
+		// case Task.STATUS_TODO:
+		//
+		// msg = "Task '" + parseObject.getString("title")
+		// + "' is back to not started.";
+		// break;
+		//
+		// case Task.STATUS_ROAD_BLOCK:
+		//
+		// msg = "Task '" + parseObject.getString("title")
+		// + "' is in road block.";
+		// break;
+		// }
+		// push(taskId, msg);
+		// }
 
-				msg = "Task '" + parseObject.getString("title") + "' is done!";
-				break;
-
-			case Task.STATUS_IN_PROGRESS:
-
-				msg = "Task '" + parseObject.getString("title")
-						+ "' is now in progress.";
-				break;
-
-			case Task.STATUS_TODO:
-
-				msg = "Task '" + parseObject.getString("title")
-						+ "' is back to not started.";
-				break;
-
-			case Task.STATUS_ROAD_BLOCK:
-
-				msg = "Task '" + parseObject.getString("title")
-						+ "' is in road block.";
-				break;
-			}
-			push(taskId, msg);
-		}
+		if (oldStatus != status)
+			push(taskId, "Task moved.");
+		else
+			push(taskId, "Task moved.", false);
 
 	}
 
@@ -476,6 +499,9 @@ public class TaskManager {
 		// push
 		if (task.getTitle() != null)
 			push(task.getId(), "Task '" + task.getTitle() + "' removed.");
+		else {
+			push(task.getId(), "Task removed.");
+		}
 
 	}
 
@@ -544,7 +570,7 @@ public class TaskManager {
 
 		// size
 		RelativeLayout.LayoutParams stickyLayoutParams = new RelativeLayout.LayoutParams(
-				Util.toPixelsWidth(context, 14), 300);
+				Math.round(Util.toPixelsWidth(context, 14)), 300);
 		stickyLayout.setLayoutParams(stickyLayoutParams);
 
 		// ////////////////////////////////////////
