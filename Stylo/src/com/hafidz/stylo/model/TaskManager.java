@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +23,7 @@ import com.hafidz.stylo.WhiteBoardScroller;
 import com.parse.DeleteCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 
 public class TaskManager {
@@ -118,7 +122,7 @@ public class TaskManager {
 	 * @param y
 	 * @throws ParseException
 	 */
-	public static void moved(Context context, String taskId, float x, float y)
+	public static int moved(Context context, String taskId, float x, float y)
 			throws ParseException {
 
 		// update status
@@ -148,6 +152,8 @@ public class TaskManager {
 		}
 
 		updateToDB(context, taskId, x, y, status);
+
+		return status;
 	}
 
 	/**
@@ -267,6 +273,27 @@ public class TaskManager {
 
 	}
 
+	private static void push(String taskId, String msg) {
+		// push
+		try {
+			ParsePush push = new ParsePush();
+			push.setChannel(Util.getActiveBoard());
+			JSONObject json = new JSONObject();
+			json.put("type", "TASK");
+			json.put("id", taskId);
+			json.put("msg", msg);
+			json.put("title", "Taskboard Updated");
+			json.put("alert", msg);
+
+			// TODO : exclude self
+
+			push.setData(json);
+			push.sendInBackground();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private static void saveToDB(Context context, Task task)
 			throws ParseException {
 
@@ -288,6 +315,9 @@ public class TaskManager {
 		Util.startLoading();
 		testObject.saveInBackground(new TaskSaveCallback(context));
 
+		// push
+		push(task.getId(), "New empty task created.");
+
 	}
 
 	/**
@@ -307,11 +337,35 @@ public class TaskManager {
 		// we want to update fresh copy
 		ParseObject parseObject = loadFromDB(context, task);
 
+		String oldOwner = parseObject.getString("owner");
 		if (newOwner == null) {
 			parseObject.remove("owner");
 		} else
 			parseObject.put("owner", newOwner);
 		parseObject.save();
+
+		// push
+
+		String msg = null;
+		String title = parseObject.getString("title");
+		if (newOwner != null) {
+			if (title != null)
+				msg = "'" + newOwner + "' assigned to task '" + title + "'";
+			else
+				msg = "'" + newOwner + "' assigned to empty task.";
+		} else {
+			if (oldOwner != null) {
+				if (title != null)
+					msg = "'" + oldOwner + "' unassigned from task '" + title
+							+ "'";
+
+			} else {
+				// hmmm....
+			}
+		}
+
+		if (msg != null)
+			push(task, msg);
 
 	}
 
@@ -334,11 +388,49 @@ public class TaskManager {
 		// we want to update fresh copy
 		ParseObject parseObject = loadFromDB(context, taskId);
 
+		// int oldStatus = parseObject.getInt("status");
+
+		// free owner
+		if (status == Task.STATUS_DONE) {
+			parseObject.remove("owner");
+		}
+
 		parseObject.put("posX", posX);
 		parseObject.put("posY", posY);
 		parseObject.put("status", status);
 
 		parseObject.save();
+
+		// push
+		String msg = null;
+		String title = parseObject.getString("title");
+		if (title != null) {
+			switch (status) {
+			case Task.STATUS_DONE:
+
+				msg = "Task '" + parseObject.getString("title") + "' is done!";
+				break;
+
+			case Task.STATUS_IN_PROGRESS:
+
+				msg = "Task '" + parseObject.getString("title")
+						+ "' is now in progress.";
+				break;
+
+			case Task.STATUS_TODO:
+
+				msg = "Task '" + parseObject.getString("title")
+						+ "' is back to not started.";
+				break;
+
+			case Task.STATUS_ROAD_BLOCK:
+
+				msg = "Task '" + parseObject.getString("title")
+						+ "' is in road block.";
+				break;
+			}
+			push(taskId, msg);
+		}
 
 	}
 
@@ -363,6 +455,10 @@ public class TaskManager {
 		parseObject.put("description", desc);
 		parseObject.save();
 
+		// push
+		push(taskId, "Task '" + parseObject.getString("title")
+				+ "' details updated.");
+
 	}
 
 	/**
@@ -376,6 +472,10 @@ public class TaskManager {
 			throws ParseException {
 
 		task.getParseObject().delete();
+
+		// push
+		if (task.getTitle() != null)
+			push(task.getId(), "Task '" + task.getTitle() + "' removed.");
 
 	}
 

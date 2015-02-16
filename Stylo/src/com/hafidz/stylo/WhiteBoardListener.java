@@ -10,6 +10,7 @@ import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.GridLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;
@@ -112,6 +113,8 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		private float newX;
 		private float newY;
 
+		private int newStatus;
+
 		public TaskMovedThread(String taskId, float newX, float newY) {
 			this.taskId = taskId;
 			this.newX = newX;
@@ -122,7 +125,7 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 		public void run() {
 			try {
 				TaskManager.obtainLock(taskId);
-				TaskManager.moved(context, taskId,
+				newStatus = TaskManager.moved(context, taskId,
 						Util.toPercentageWidth(context, newX), newY);
 				TaskManager.releaseLock(taskId);
 
@@ -131,8 +134,26 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 					@Override
 					public void run() {
 						Util.stopLoading();
-
 						Util.showSuccess(context, "Task updated in server.");
+
+						// update UI (free owner on task sticker and return back
+						// owner to member pool)
+						if (Task.STATUS_DONE == newStatus) {
+							RelativeLayout taskSticker = (RelativeLayout) Util.whiteboardLayout
+									.findViewWithTag(taskId);
+							TextView memberView = (TextView) taskSticker
+									.findViewById(R.id.taskDetailOwner);
+							String memberID = memberView.getText() == null ? null
+									: memberView.getText().toString();
+							if (memberID != null && !memberID.isEmpty()) {
+								TaskManager.uiUpdateStickerOwner(taskSticker,
+										null,
+										(GridLayout) Util.whiteboardLayout
+												.findViewWithTag(memberID));
+								Util.showSuccess(context, memberID
+										+ " is now free.");
+							}
+						}
 
 					}
 				});

@@ -84,7 +84,7 @@ public class Util {
 	}
 
 	// height is fix!!!
-	public static float toPixelsHeight(Context context, float percentage) {
+	public static int toPixelsHeight(Context context, int percentage) {
 
 		return (percentage) * getScreenHeight(context) / 100;
 
@@ -105,7 +105,8 @@ public class Util {
 	public static String getActiveBoard() {
 		// return "abdulhafidz@gmail.com";
 		// return "FAUZAMAN@HP";
-		return "ETHAN@HP";
+		// return "ETHAN@HP";
+		return "DEV";
 	}
 
 	public static void showError(Context context, String msg) {

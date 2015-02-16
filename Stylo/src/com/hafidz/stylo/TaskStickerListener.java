@@ -12,6 +12,7 @@ import android.view.View.DragShadowBuilder;
 import android.view.View.OnClickListener;
 import android.view.View.OnDragListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -284,6 +285,13 @@ public class TaskStickerListener implements OnDragListener,
 		dialog.show();
 
 		dialog.getButton(Dialog.BUTTON_POSITIVE).setEnabled(false);
+
+		// dialog.getWindow().setLayout(Util.toPixelsWidth(context, 90),
+		// Util.toPixelsHeight(context, 90));
+
+		// dialog.getWindow().setLayout(
+		// Util.toPixelsWidth(context, LayoutParams.WRAP_CONTENT),
+		// Util.toPixelsHeight(context, LayoutParams.WRAP_CONTENT));
 
 	}
 

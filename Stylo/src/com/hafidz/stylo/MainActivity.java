@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -28,6 +29,8 @@ import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParsePush;
+import com.parse.SaveCallback;
 
 /**
  * TODO : onlongclick edit, overall view, ontouch hand cursor, road block,
@@ -53,6 +56,9 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 	private ProgressDialog progress;
 
+	// determine app is foreground or background
+	public static boolean onBackground;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,11 +76,6 @@ public class MainActivity extends Activity implements OnRefreshListener {
 			editor.commit();
 
 		}
-
-		// Enable Local Datastore.
-		Parse.enableLocalDatastore(this);
-		Parse.initialize(this, "rvL9mFoct6KVwjvIfTCV23qRwKBKlcwPrwPVpvPI",
-				"dPxpmhhE7ceXzKwGDpkdWBqWKh7IyWIaJJpd7yJl");
 
 		mainActivityLayout = LayoutInflater.from(getApplicationContext())
 				.inflate(R.layout.activity_main, null);
@@ -150,6 +151,13 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		progress = new ProgressDialog(getApplicationContext());
 
+		// // hamburger
+		// ImageView hamburger = new ImageView(getApplicationContext());
+		// hamburger.setImageResource(android.R.drawable.ic_menu_sort_by_size);
+		// hamburger.setX(10);
+		// hamburger.setY(10);
+		// whiteBoardLayout.addView(hamburger);
+
 	}
 
 	@Override
@@ -173,8 +181,14 @@ public class MainActivity extends Activity implements OnRefreshListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		onBackground = false;
 		reloadStickers();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		onBackground = true;
 	}
 
 	public void reloadStickers() {

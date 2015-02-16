@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +23,7 @@ import com.hafidz.stylo.R;
 import com.hafidz.stylo.Util;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 
 /**
@@ -131,6 +135,8 @@ public class MemberManager {
 		Util.startLoading();
 		testObject.saveInBackground(new MemberSaveCallback(member, context));
 
+		push(member.getName(), "Member '" + member.getName() + "' created.");
+
 	}
 
 	/**
@@ -152,6 +158,7 @@ public class MemberManager {
 		Util.startLoading();
 		member.getParseObject().save();
 
+		push(memberName, "Member '" + memberName + "' email changed");
 	}
 
 	/**
@@ -188,6 +195,8 @@ public class MemberManager {
 		Member member = load(context, memberName);
 
 		member.getParseObject().delete();
+
+		push(memberName, "Member '" + memberName + "' removed.");
 
 	}
 
@@ -270,5 +279,26 @@ public class MemberManager {
 
 		Util.whiteboardLayout.addView(memberSticker);
 
+	}
+
+	private static void push(String memberName, String msg) {
+		// push
+		try {
+			ParsePush push = new ParsePush();
+			push.setChannel(Util.getActiveBoard());
+			JSONObject json = new JSONObject();
+			json.put("type", "MEMBER");
+			json.put("id", memberName);
+			json.put("msg", msg);
+			json.put("title", "Taskboard Updated");
+			json.put("alert", msg);
+
+			// TODO : exclude self
+
+			push.setData(json);
+			push.sendInBackground();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 }

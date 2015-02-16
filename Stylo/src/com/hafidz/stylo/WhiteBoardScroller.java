@@ -8,6 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.view.View;
 import android.widget.ScrollView;
 
 /**
@@ -21,6 +23,8 @@ public class WhiteBoardScroller extends ScrollView {
 
 	private Context context;
 	private Paint paint;
+
+	private Path path;
 
 	public WhiteBoardScroller(Context context) {
 		super(context);
@@ -37,6 +41,10 @@ public class WhiteBoardScroller extends ScrollView {
 		paint.setColor(Color.parseColor("#9FA8DA"));
 		paint.setPathEffect(new DashPathEffect(new float[] { 15, 25 }, 0));
 
+		// for dash effect fix, but become lag
+		// setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+		path = new Path();
 	}
 
 	@Override
@@ -46,18 +54,34 @@ public class WhiteBoardScroller extends ScrollView {
 
 		int topStart = 5;
 		// int bottomEnd = toPixelsHeight(98);
-		int bottomEnd = 1990;
+		int bottomEnd = 1980;
 
 		int rightEnd = toPixelsWidth(98);
 
 		// lines
+
+		// lag like shit
+		// path.moveTo(toPixelsWidth(10), topStart);
+		// path.lineTo(toPixelsWidth(10), bottomEnd);
+		//
+		// path.moveTo(toPixelsWidth(LINE_IN_PROGRESS), topStart);
+		// path.lineTo(toPixelsWidth(LINE_IN_PROGRESS), bottomEnd);
+		//
+		// path.moveTo(toPixelsWidth(LINE_DONE), topStart);
+		// path.lineTo(toPixelsWidth(LINE_DONE), bottomEnd);
+		//
+		// path.moveTo(10, 50);
+		// path.lineTo(rightEnd, 50);
+		//
+		// canvas.drawPath(path, paint);
+
+		// ///////////////////////
 		canvas.drawLine(toPixelsWidth(10), topStart, toPixelsWidth(10),
 				bottomEnd, paint);
-		canvas.drawLine(toPixelsWidth(LINE_IN_PROGRESS), topStart, toPixelsWidth(LINE_IN_PROGRESS),
-				bottomEnd, paint);
-		canvas.drawLine(toPixelsWidth(LINE_DONE), topStart, toPixelsWidth(LINE_DONE),
-				bottomEnd, paint);
-
+		canvas.drawLine(toPixelsWidth(LINE_IN_PROGRESS), topStart,
+				toPixelsWidth(LINE_IN_PROGRESS), bottomEnd, paint);
+		canvas.drawLine(toPixelsWidth(LINE_DONE), topStart,
+				toPixelsWidth(LINE_DONE), bottomEnd, paint);
 		canvas.drawLine(10, 50, rightEnd, 50, paint);
 
 	}
