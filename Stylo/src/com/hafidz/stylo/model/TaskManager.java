@@ -71,10 +71,10 @@ public class TaskManager {
 	 * @param owner
 	 * @throws ParseException
 	 */
-	public static void assignOwner(Context context, String taskId, Member owner)
-			throws ParseException {
+	public static void assignOwner(Context context, String taskId,
+			String newOwner) throws ParseException {
 
-		updateToDB(context, taskId, owner.getName());
+		updateToDB(context, taskId, newOwner);
 
 		// Toast.makeText(context, owner.getName() + " assigned to a task.",
 		// Toast.LENGTH_SHORT).show();
@@ -320,10 +320,8 @@ public class TaskManager {
 	 * @param newOwner
 	 * @throws ParseException
 	 */
-	private static void updateToDB(Context context, String taskId, String newOwner)
-			throws ParseException {
-
-		// ParseObject parseObject = task.getParseObject();
+	private static void updateToDB(Context context, String taskId,
+			String newOwner) throws ParseException {
 
 		// we want to update fresh copy
 		ParseObject parseObject = loadFromDB(context, taskId);
@@ -384,6 +382,8 @@ public class TaskManager {
 		// we want to update fresh copy
 		ParseObject parseObject = loadFromDB(context, taskId);
 
+		String oriOwner = parseObject.getString("owner");
+
 		int oldStatus = parseObject.getInt("status");
 
 		// free owner
@@ -428,10 +428,19 @@ public class TaskManager {
 		// push(taskId, msg);
 		// }
 
-		if (oldStatus != status)
-			push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.");
-		else
-			push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.", false);
+		if (status == Task.STATUS_DONE) {
+			if (oldStatus != status)
+				push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.",
+						oriOwner, true);
+			else
+				push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.",
+						oriOwner, false);
+		} else {
+			if (oldStatus != status)
+				push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.");
+			else
+				push(taskId, TaskManager.PUSH_ACTION_MOVE, "Task moved.", false);
+		}
 
 	}
 

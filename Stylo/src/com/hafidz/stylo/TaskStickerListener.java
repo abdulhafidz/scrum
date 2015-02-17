@@ -48,8 +48,9 @@ public class TaskStickerListener implements OnDragListener,
 		public void run() {
 			try {
 				TaskManager.obtainLock(taskId);
-				TaskManager.assignOwner(context, taskId,
-						MemberManager.load(context, newOwner));
+				// TaskManager.assignOwner(context, taskId,
+				// MemberManager.load(context, newOwner));
+				TaskManager.assignOwner(context, taskId, newOwner);
 				TaskManager.releaseLock(taskId);
 
 				Util.mainActivity.runOnUiThread(new Runnable() {
@@ -57,7 +58,7 @@ public class TaskStickerListener implements OnDragListener,
 					@Override
 					public void run() {
 						Util.stopLoading();
-						Util.showSuccess(context, "Task updated in server.");
+						Util.showSuccess(context, "Task updated to server.");
 
 					}
 				});

@@ -168,48 +168,74 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 										taskSticker.setX(Util.toPixelsWidth(
 												myContext, task.getPosX()));
 
+										// owner
+										System.out
+												.println("task.getOwner() xxxxxxxxxxxxxxxxxxxx uuuuuuuuuuuu = "
+														+ task.getOwner());
+										TextView ownerTV = (TextView) taskSticker
+												.findViewById(R.id.taskDetailOwner);
+										ownerTV.setText(task.getOwner());
+
 										if (TaskManager.PUSH_ACTION_UPDATE_OWNER == action) {
 
-											System.out
-													.println("task.getOwner() = = = = "
-															+ task.getOwner());
-
-											TextView ownerTV = (TextView) taskSticker
-													.findViewById(R.id.taskDetailOwner);
-											ownerTV.setText(task.getOwner());
-
 											// remove owner from pool
+											Float newOwnerPoolY = null;
 											if (task.getOwner() != null) {
 												View memberSticker = Util.whiteboardLayout
 														.findViewWithTag(task
 																.getOwner());
 												if (memberSticker != null) {
+													newOwnerPoolY = memberSticker
+															.getY();
 													memberSticker
 															.setVisibility(View.GONE);
+
 												}
 
 											}
 											// add member back to pool
-											else {
-												if (json.has("oriOwner")) {
-													try {
-														String oriOwner = json
-																.getString("oriOwner");
-														System.out
-																.println("oriOwner = = = "
-																		+ oriOwner);
-														View memberSticker = Util.whiteboardLayout
-																.findViewWithTag(oriOwner);
-														if (memberSticker != null) {
+
+											if (json.has("oriOwner")) {
+												try {
+													String oriOwner = json
+															.getString("oriOwner");
+
+													View memberSticker = Util.whiteboardLayout
+															.findViewWithTag(oriOwner);
+													if (memberSticker != null) {
+														memberSticker
+																.setVisibility(View.VISIBLE);
+
+														// replace position of
+														// new owner
+														if (newOwnerPoolY != null)
 															memberSticker
-																	.setVisibility(View.VISIBLE);
-														}
-													} catch (JSONException e) {
-														e.printStackTrace();
+																	.setY(newOwnerPoolY);
 													}
+												} catch (JSONException e) {
+													e.printStackTrace();
 												}
 											}
 
+										} else if (TaskManager.PUSH_ACTION_MOVE == action) {
+
+											if (task.getStatus() == Task.STATUS_DONE
+													&& json.has("oriOwner")) {
+												try {
+													String oriOwner = json
+															.getString("oriOwner");
+
+													View memberSticker = Util.whiteboardLayout
+															.findViewWithTag(oriOwner);
+													if (memberSticker != null) {
+														memberSticker
+																.setVisibility(View.VISIBLE);
+
+													}
+												} catch (JSONException e) {
+													e.printStackTrace();
+												}
+											}
 										}
 
 									}

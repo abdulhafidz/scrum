@@ -24,7 +24,7 @@
 
 	<View
         android:layout_width="fill_parent"
-        android:layout_height="1dp"
+        android:layout_height="2dp"
         android:layout_below="@+id/smallTaskTitle"
         android:layout_marginBottom="25dp"
         android:background="#3F51B5" />
@@ -46,7 +46,7 @@
 
     <View
         android:layout_width="fill_parent"
-        android:layout_height="1dp"
+        android:layout_height="2dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="28dp"
         android:background="#3F51B5" />
@@ -65,7 +65,7 @@
 
     <View
         android:layout_width="27dp"
-        android:layout_height="1dp"
+        android:layout_height="2dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
          android:rotation="90"
