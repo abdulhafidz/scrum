@@ -16,15 +16,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.TaskStickerListener;
 import com.hafidz.stylo.Util;
-import com.hafidz.stylo.WhiteBoardListener;
 import com.hafidz.stylo.WhiteBoardScroller;
+import com.hafidz.stylo.listener.TaskStickerListener;
+import com.hafidz.stylo.listener.WhiteBoardListener;
 import com.parse.DeleteCallback;
+import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseQuery;
+import com.parse.ParseRole;
 
 public class TaskManager {
 
@@ -287,23 +289,24 @@ public class TaskManager {
 			throws ParseException {
 
 		// push to server
-		ParseObject testObject = new ParseObject("Task");
-		testObject.put("board", Util.getActiveBoard());
-		testObject.put("id", task.getId());
+		ParseObject parse = new ParseObject("Task");
+		parse.put("board", Util.getActiveBoard());
+		parse.put("id", task.getId());
 		if (task.getTitle() != null)
-			testObject.put("title", task.getTitle());
+			parse.put("title", task.getTitle());
 		if (task.getDescription() != null)
-			testObject.put("description", task.getDescription());
+			parse.put("description", task.getDescription());
 		if (task.getOwner() != null)
-			testObject.put("owner", task.getOwner());
-		testObject.put("status", task.getStatus());
-		testObject.put("posX", task.getPosX());
-		testObject.put("posY", task.getPosY());
-		// testObject.save();
+			parse.put("owner", task.getOwner());
+		parse.put("status", task.getStatus());
+		parse.put("posX", task.getPosX());
+		parse.put("posY", task.getPosY());
+
+		// permissions
+		Util.setPermissions(parse);
 
 		Util.startLoading();
-		testObject
-				.saveInBackground(new TaskSaveCallback(context, task.getId()));
+		parse.saveInBackground(new TaskSaveCallback(context, task.getId()));
 
 		// push (we push in TaskSaveCallback to prevent push before object saved
 		// in server)

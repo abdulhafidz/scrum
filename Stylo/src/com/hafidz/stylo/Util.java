@@ -6,9 +6,13 @@ package com.hafidz.stylo;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.parse.ParseACL;
+import com.parse.ParseObject;
+
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -27,6 +31,7 @@ public class Util {
 	public static RelativeLayout whiteboardLayout;
 	public static SwipeRefreshLayout mainLayout;
 	public static MainActivity mainActivity;
+	public static Context context;
 
 	// public static int toPixels(Context context, float dp) {
 	// DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -147,6 +152,26 @@ public class Util {
 
 	public static void reloadStickers() {
 		mainActivity.reloadStickers();
+	}
+
+	public static void setPermissions(ParseObject parse) {
+		ParseACL parseACL = new ParseACL();
+		parseACL.setRoleWriteAccess(Util.getActiveBoard(), true);
+		parseACL.setRoleReadAccess(Util.getActiveBoard(), true);
+		parse.setACL(parseACL);
+	}
+
+	public static void exitApp(MainActivity mainActivity) {
+
+		mainActivity.finish();
+		Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.addCategory(Intent.CATEGORY_HOME);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		mainActivity.startActivity(intent);
+
+		// int pid = android.os.Process.myPid();
+		// android.os.Process.killProcess(pid);
+
 	}
 
 }

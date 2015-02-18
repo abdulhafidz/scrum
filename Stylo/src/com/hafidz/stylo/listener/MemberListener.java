@@ -1,4 +1,4 @@
-package com.hafidz.stylo;
+package com.hafidz.stylo.listener;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -18,6 +18,10 @@ import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.hafidz.stylo.R;
+import com.hafidz.stylo.Util;
+import com.hafidz.stylo.R.id;
+import com.hafidz.stylo.R.layout;
 import com.hafidz.stylo.async.LoadMemberAsyncTask;
 import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;

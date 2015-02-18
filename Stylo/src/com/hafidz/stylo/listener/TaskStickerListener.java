@@ -1,4 +1,4 @@
-package com.hafidz.stylo;
+package com.hafidz.stylo.listener;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,6 +21,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.hafidz.stylo.R;
+import com.hafidz.stylo.Util;
+import com.hafidz.stylo.R.id;
+import com.hafidz.stylo.R.layout;
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;

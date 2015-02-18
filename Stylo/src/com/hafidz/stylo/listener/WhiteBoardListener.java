@@ -1,4 +1,4 @@
-package com.hafidz.stylo;
+package com.hafidz.stylo.listener;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -12,6 +12,9 @@ import android.widget.GridLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hafidz.stylo.R;
+import com.hafidz.stylo.Util;
+import com.hafidz.stylo.R.id;
 import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;

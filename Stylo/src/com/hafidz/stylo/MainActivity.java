@@ -4,8 +4,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -13,24 +18,27 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
+import com.hafidz.stylo.listener.DrawerItemListener;
+import com.hafidz.stylo.listener.GarbageListener;
+import com.hafidz.stylo.listener.LoginListener;
+import com.hafidz.stylo.listener.WhiteBoardListener;
 import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
-import com.parse.Parse;
+import com.hafidz.stylo.model.User;
+import com.hafidz.stylo.model.UserManager;
 import com.parse.ParseException;
-import com.parse.ParsePush;
-import com.parse.SaveCallback;
 
 /**
  * TODO : onlongclick edit, overall view, ontouch hand cursor, road block,
@@ -62,6 +70,54 @@ public class MainActivity extends Activity implements OnRefreshListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// for easy access later
+		Util.mainActivity = this;
+		Util.context = getApplicationContext();
+
+		// - - - - - - - - - - - - -
+		// user login [START]
+		// - - - - - - - - - - - - -
+		if (UserManager.getCurrentUser() == null) {
+			// show login dialog
+			AlertDialog.Builder dialogBuilder = new Builder(
+					getApplicationContext());
+			dialogBuilder.setTitle("Sign In");
+			View loginLayout = LayoutInflater.from(getApplicationContext())
+					.inflate(R.layout.login_layout, null);
+			dialogBuilder.setView(loginLayout);
+			dialogBuilder.setPositiveButton(android.R.string.ok,
+					new OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							// TODO Auto-generated method stub
+
+						}
+					});
+			dialogBuilder.setNegativeButton(android.R.string.cancel,
+					new OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Util.exitApp(Util.mainActivity);
+
+						}
+					});
+
+			AlertDialog loginDialog = dialogBuilder.create();
+			loginDialog.show();
+
+			// sign up button
+			Button register = (Button) loginLayout
+					.findViewById(R.id.loginRegister);
+			register.setOnClickListener(new LoginListener());
+
+		}
+
+		// - - - - - - - - - - - - -
+		// user login [END]
+		// - - - - - - - - - - - - -
 
 		// check first time user or not
 		SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
@@ -147,7 +203,6 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		// for easy access later
 		Util.mainLayout = mainLayout;
-		Util.mainActivity = this;
 
 		progress = new ProgressDialog(getApplicationContext());
 

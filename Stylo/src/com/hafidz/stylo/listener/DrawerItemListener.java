@@ -1,7 +1,10 @@
 /**
  * 
  */
-package com.hafidz.stylo;
+package com.hafidz.stylo.listener;
+
+import com.hafidz.stylo.MainActivity;
+import com.hafidz.stylo.Util;
 
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;

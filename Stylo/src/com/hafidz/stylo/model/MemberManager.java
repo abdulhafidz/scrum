@@ -18,9 +18,9 @@ import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.hafidz.stylo.MemberListener;
 import com.hafidz.stylo.R;
 import com.hafidz.stylo.Util;
+import com.hafidz.stylo.listener.MemberListener;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
@@ -126,17 +126,20 @@ public class MemberManager {
 			throws ParseException {
 
 		// push to server
-		ParseObject testObject = new ParseObject("Member");
-		testObject.put("board", Util.getActiveBoard());
-		testObject.put("name", member.getName());
+		ParseObject parse = new ParseObject("Member");
+		parse.put("board", Util.getActiveBoard());
+		parse.put("name", member.getName());
 		if (member.getEmail() != null)
-			testObject.put("email", member.getEmail());
+			parse.put("email", member.getEmail());
 
-		testObject.put("posY", member.getPosY());
+		parse.put("posY", member.getPosY());
+
+		// set permissions
+		Util.setPermissions(parse);
 
 		// testObject.save();
 		Util.startLoading();
-		testObject.saveInBackground(new MemberSaveCallback(member, context));
+		parse.saveInBackground(new MemberSaveCallback(member, context));
 
 		// TODO: push in callback
 		push(member.getName(), MemberManager.PUSH_ACTION_CREATE,

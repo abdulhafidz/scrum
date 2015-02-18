@@ -1,4 +1,4 @@
-package com.hafidz.stylo;
+package com.hafidz.stylo.listener;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hafidz.stylo.R;
+import com.hafidz.stylo.Util;
+import com.hafidz.stylo.R.id;
 import com.hafidz.stylo.async.DeleteMemberAsyncTask;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
