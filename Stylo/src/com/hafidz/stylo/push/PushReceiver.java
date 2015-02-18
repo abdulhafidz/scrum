@@ -84,11 +84,18 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 								Util.stopLoading();
 
 								if (task != null) {
-									TaskManager.createEmptySticker(
-											myContext,
-											Util.toPixelsWidth(myContext,
-													task.getPosX()),
-											task.getPosY(), task.getId());
+
+									// check sticker already exist or not first
+									if (Util.whiteboardLayout
+											.findViewWithTag(task.getId()) == null) {
+
+										TaskManager.createEmptySticker(
+												myContext, Util.toPixelsWidth(
+														myContext,
+														task.getPosX()), task
+														.getPosY(), task
+														.getId());
+									}
 								}
 
 							}
