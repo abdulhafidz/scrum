@@ -24,6 +24,7 @@ public class MemberSaveCallback extends SaveCallback {
 		super();
 		this.member = member;
 		this.context = context;
+
 	}
 
 	@Override
@@ -33,6 +34,10 @@ public class MemberSaveCallback extends SaveCallback {
 					(MainActivity) context, member));
 
 		} else {
+
+			MemberManager.push(member.getName(),
+					MemberManager.PUSH_ACTION_CREATE, "New member created.",
+					true);
 
 			((Activity) context).runOnUiThread(new Runnable() {
 

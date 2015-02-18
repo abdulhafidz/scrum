@@ -31,8 +31,11 @@ import com.parse.ParseQuery;
  * 
  */
 public class MemberManager {
-	// public static Map<String, Member> allMembers = new HashMap<String,
-	// Member>();
+	// push
+	public static final int PUSH_ACTION_CREATE = 1;
+	public static final int PUSH_ACTION_DELETE = 0;
+	public static final int PUSH_ACTION_MOVE = 2;
+	public static final int PUSH_ACTION_UPDATE_DETAILS = 3;
 
 	public static Map<String, Member> getAll(Context context)
 			throws ParseException {
@@ -135,7 +138,9 @@ public class MemberManager {
 		Util.startLoading();
 		testObject.saveInBackground(new MemberSaveCallback(member, context));
 
-		push(member.getName(), "Member '" + member.getName() + "' created.");
+		// TODO: push in callback
+		push(member.getName(), MemberManager.PUSH_ACTION_CREATE,
+				"New member created.", true);
 
 	}
 
@@ -158,7 +163,8 @@ public class MemberManager {
 		Util.startLoading();
 		member.getParseObject().save();
 
-		push(memberName, "Member '" + memberName + "' email changed");
+		push(memberName, PUSH_ACTION_UPDATE_DETAILS, "Member '" + memberName
+				+ "' email changed", true);
 	}
 
 	/**
@@ -180,6 +186,8 @@ public class MemberManager {
 		Util.startLoading();
 		member.getParseObject().save();
 
+		push(memberName, PUSH_ACTION_MOVE, "Member moved.", false);
+
 	}
 
 	/**
@@ -196,7 +204,8 @@ public class MemberManager {
 
 		member.getParseObject().delete();
 
-		push(memberName, "Member '" + memberName + "' removed.");
+		push(memberName, PUSH_ACTION_DELETE, "Member '" + memberName
+				+ "' removed.", true);
 
 	}
 
@@ -257,7 +266,6 @@ public class MemberManager {
 		GridLayout memberSticker = (GridLayout) LayoutInflater.from(context)
 				.inflate(R.layout.member_layout, null);
 
-		// String memberName = "#" + MemberManager.getAll(context).size();
 		TextView memberNameView = (TextView) memberSticker
 				.findViewById(R.id.memberName);
 		memberNameView.setText(memberName);
@@ -281,7 +289,8 @@ public class MemberManager {
 
 	}
 
-	private static void push(String memberName, String msg) {
+	public static void push(String memberName, int action, String msg,
+			boolean notification) {
 		// push
 		try {
 			ParsePush push = new ParsePush();
@@ -290,8 +299,15 @@ public class MemberManager {
 			json.put("type", "MEMBER");
 			json.put("id", memberName);
 			json.put("msg", msg);
-			json.put("title", "Taskboard Updated");
-			json.put("alert", msg);
+			json.put("action", action);
+			//
+			// if (oriMember != null)
+			// json.put("oriMember", oriMember);
+
+			if (notification) {
+				json.put("title", "Taskboard Member Updated");
+				json.put("alert", msg);
+			}
 
 			// TODO : exclude self
 

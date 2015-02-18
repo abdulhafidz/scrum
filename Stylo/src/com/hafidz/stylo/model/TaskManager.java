@@ -544,7 +544,7 @@ public class TaskManager {
 
 	}
 
-	public static RelativeLayout createEmptySticker(Context context, float x,
+	public static RelativeLayout UICreateEmptySticker(Context context, float x,
 			float y, String taskId) {
 		// new small sticky layout
 		RelativeLayout stickyLayout = (RelativeLayout) LayoutInflater.from(
@@ -580,7 +580,7 @@ public class TaskManager {
 		return stickyLayout;
 	}
 
-	public static void removeOwnerFromTaskStickerUI(String taskId) {
+	public static void UIremoveOwnerFromTaskSticker(String taskId) {
 		// update small task sticker
 		View smallTask = Util.whiteboardLayout.findViewWithTag(taskId);
 		TextView smallOwner = (TextView) smallTask

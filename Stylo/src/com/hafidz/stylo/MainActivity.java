@@ -299,7 +299,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 			// add tasks stickers to whiteboard
 			for (Entry<String, Task> entry : tasks.entrySet()) {
 				Task task = entry.getValue();
-				RelativeLayout sticker = TaskManager.createEmptySticker(
+				RelativeLayout sticker = TaskManager.UICreateEmptySticker(
 						getApplicationContext(),
 						Util.toPixelsWidth(getApplicationContext(),
 								Math.round(task.getPosX())), task.getPosY(),

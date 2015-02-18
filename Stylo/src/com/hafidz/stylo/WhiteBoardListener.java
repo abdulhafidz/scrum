@@ -94,7 +94,7 @@ public class WhiteBoardListener implements OnTouchListener, OnDragListener,
 			Task task = new Task(id, Util.toPercentageWidth(context, x), y,
 					null);
 
-			TaskManager.createEmptySticker(context, x, y, id);
+			TaskManager.UICreateEmptySticker(context, x, y, id);
 
 			TaskManager.add(context, task);
 

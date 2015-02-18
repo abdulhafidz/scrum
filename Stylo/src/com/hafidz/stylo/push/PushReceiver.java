@@ -15,6 +15,8 @@ import android.widget.TextView;
 import com.hafidz.stylo.MainActivity;
 import com.hafidz.stylo.R;
 import com.hafidz.stylo.Util;
+import com.hafidz.stylo.model.Member;
+import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.model.TaskManager;
 import com.parse.ParseException;
@@ -89,7 +91,7 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 									if (Util.whiteboardLayout
 											.findViewWithTag(task.getId()) == null) {
 
-										TaskManager.createEmptySticker(
+										TaskManager.UICreateEmptySticker(
 												myContext, Util.toPixelsWidth(
 														myContext,
 														task.getPosX()), task
@@ -257,7 +259,119 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 					}
 
 				} else if ("MEMBER".equals(type)) {
+					switch (action) {
 
+					case MemberManager.PUSH_ACTION_CREATE:
+						AsyncTask<String, Void, Member> bgTaskCreate = new AsyncTask<String, Void, Member>() {
+							@Override
+							protected void onPreExecute() {
+								Util.startLoading();
+							}
+
+							@Override
+							protected Member doInBackground(String... args) {
+								try {
+
+									return MemberManager.load(myContext, id);
+								} catch (ParseException e) {
+									e.printStackTrace();
+
+								}
+
+								return null;
+							}
+
+							@Override
+							protected void onPostExecute(Member member) {
+
+								Util.stopLoading();
+
+								if (member != null) {
+
+									// check sticker already exist or not first
+									if (Util.whiteboardLayout
+											.findViewWithTag(member.getName()) == null)
+
+									{
+
+										MemberManager.UIcreateNewSticker(
+												myContext, member.getPosY(),
+												member.getName());
+									}
+								}
+
+							}
+						};
+
+						bgTaskCreate.execute();
+						break;
+
+					case MemberManager.PUSH_ACTION_DELETE:
+						View memberStricker = Util.whiteboardLayout
+								.findViewWithTag(id);
+						if (memberStricker != null) {
+							Util.whiteboardLayout.removeView(memberStricker);
+						}
+
+						// free owner???
+
+						break;
+
+					case MemberManager.PUSH_ACTION_MOVE:
+					case MemberManager.PUSH_ACTION_UPDATE_DETAILS:
+
+						AsyncTask<String, Void, Member> bgTaskUpdate = new AsyncTask<String, Void, Member>() {
+							@Override
+							protected void onPreExecute() {
+								Util.startLoading();
+							}
+
+							@Override
+							protected Member doInBackground(String... args) {
+								try {
+
+									return MemberManager.load(myContext, id);
+								} catch (ParseException e) {
+									e.printStackTrace();
+
+								}
+
+								return null;
+							}
+
+							@Override
+							protected void onPostExecute(Member member) {
+
+								Util.stopLoading();
+
+								if (member != null) {
+
+									// update UI
+									View taskSticker = null;
+
+									taskSticker = Util.whiteboardLayout
+											.findViewWithTag(member.getName());
+
+									if (taskSticker != null) {
+
+										// details
+										// TextView nameTV = (TextView)
+										// taskSticker.findViewById(R.id.memberName);
+										// nameTV.setText(member.getName());
+
+										// postition
+										taskSticker.setY(member.getPosY());
+
+									}
+
+								}
+							}
+						};
+
+						bgTaskUpdate.execute();
+						break;
+
+					}
 				}
 			}
 
@@ -273,5 +387,4 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 
 		super.onPushReceive(context, intent);
 	}
-
 }
