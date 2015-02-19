@@ -11,9 +11,9 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.Util;
 import com.hafidz.stylo.R.id;
-import com.hafidz.stylo.model.TaskManager;
+import com.hafidz.stylo.manager.TaskManager;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 
 /**

@@ -1,4 +1,4 @@
-package com.hafidz.stylo.model;
+package com.hafidz.stylo.manager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +16,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.Util;
 import com.hafidz.stylo.WhiteBoardScroller;
+import com.hafidz.stylo.callback.TaskSaveCallback;
 import com.hafidz.stylo.listener.TaskStickerListener;
 import com.hafidz.stylo.listener.WhiteBoardListener;
+import com.hafidz.stylo.model.Task;
+import com.hafidz.stylo.util.Util;
 import com.parse.DeleteCallback;
 import com.parse.ParseACL;
 import com.parse.ParseException;

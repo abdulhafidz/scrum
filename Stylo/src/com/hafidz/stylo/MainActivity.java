@@ -32,12 +32,13 @@ import com.hafidz.stylo.listener.DrawerItemListener;
 import com.hafidz.stylo.listener.GarbageListener;
 import com.hafidz.stylo.listener.LoginListener;
 import com.hafidz.stylo.listener.WhiteBoardListener;
+import com.hafidz.stylo.manager.MemberManager;
+import com.hafidz.stylo.manager.TaskManager;
+import com.hafidz.stylo.manager.UserManager;
 import com.hafidz.stylo.model.Member;
-import com.hafidz.stylo.model.MemberManager;
 import com.hafidz.stylo.model.Task;
-import com.hafidz.stylo.model.TaskManager;
 import com.hafidz.stylo.model.User;
-import com.hafidz.stylo.model.UserManager;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 
 /**
@@ -75,49 +76,49 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		Util.mainActivity = this;
 		Util.context = getApplicationContext();
 
-		// - - - - - - - - - - - - -
-		// user login [START]
-		// - - - - - - - - - - - - -
-		if (UserManager.getCurrentUser() == null) {
-			// show login dialog
-			AlertDialog.Builder dialogBuilder = new Builder(
-					getApplicationContext());
-			dialogBuilder.setTitle("Sign In");
-			View loginLayout = LayoutInflater.from(getApplicationContext())
-					.inflate(R.layout.login_layout, null);
-			dialogBuilder.setView(loginLayout);
-			dialogBuilder.setPositiveButton(android.R.string.ok,
-					new OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface arg0, int arg1) {
-							// TODO Auto-generated method stub
-
-						}
-					});
-			dialogBuilder.setNegativeButton(android.R.string.cancel,
-					new OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							Util.exitApp(Util.mainActivity);
-
-						}
-					});
-
-			AlertDialog loginDialog = dialogBuilder.create();
-			loginDialog.show();
-
-			// sign up button
-			Button register = (Button) loginLayout
-					.findViewById(R.id.loginRegister);
-			register.setOnClickListener(new LoginListener());
-
-		}
-
-		// - - - - - - - - - - - - -
-		// user login [END]
-		// - - - - - - - - - - - - -
+		// // - - - - - - - - - - - - -
+		// // user login [START]
+		// // - - - - - - - - - - - - -
+		// if (UserManager.getCurrentUser() == null) {
+		// // show login dialog
+		// AlertDialog.Builder dialogBuilder = new Builder(
+		// getApplicationContext());
+		// dialogBuilder.setTitle("Sign In");
+		// View loginLayout = LayoutInflater.from(getApplicationContext())
+		// .inflate(R.layout.login_layout, null);
+		// dialogBuilder.setView(loginLayout);
+		// dialogBuilder.setPositiveButton(android.R.string.ok,
+		// new OnClickListener() {
+		//
+		// @Override
+		// public void onClick(DialogInterface arg0, int arg1) {
+		// // TODO Auto-generated method stub
+		//
+		// }
+		// });
+		// dialogBuilder.setNegativeButton(android.R.string.cancel,
+		// new OnClickListener() {
+		//
+		// @Override
+		// public void onClick(DialogInterface dialog, int which) {
+		// Util.exitApp(Util.mainActivity);
+		//
+		// }
+		// });
+		//
+		// AlertDialog loginDialog = dialogBuilder.create();
+		// loginDialog.show();
+		//
+		// // sign up button
+		// Button register = (Button) loginLayout
+		// .findViewById(R.id.loginRegister);
+		// register.setOnClickListener(new LoginListener());
+		//
+		// }
+		//
+		// // - - - - - - - - - - - - -
+		// // user login [END]
+		// // - - - - - - - - - - - - -
 
 		// check first time user or not
 		SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);

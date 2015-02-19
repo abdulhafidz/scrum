@@ -3,6 +3,8 @@
  */
 package com.hafidz.stylo;
 
+import com.hafidz.stylo.util.Util;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;

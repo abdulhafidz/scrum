@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.hafidz.stylo.model;
+package com.hafidz.stylo.manager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.Util;
+import com.hafidz.stylo.callback.MemberSaveCallback;
 import com.hafidz.stylo.listener.MemberListener;
+import com.hafidz.stylo.model.Member;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParsePush;

@@ -22,12 +22,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.Util;
 import com.hafidz.stylo.R.id;
 import com.hafidz.stylo.R.layout;
-import com.hafidz.stylo.model.MemberManager;
+import com.hafidz.stylo.manager.MemberManager;
+import com.hafidz.stylo.manager.TaskManager;
 import com.hafidz.stylo.model.Task;
-import com.hafidz.stylo.model.TaskManager;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 
 public class TaskStickerListener implements OnDragListener,

@@ -1,13 +1,14 @@
 /**
  * 
  */
-package com.hafidz.stylo.model;
+package com.hafidz.stylo.callback;
 
 import android.app.Activity;
 import android.content.Context;
 
 import com.hafidz.stylo.MainActivity;
-import com.hafidz.stylo.Util;
+import com.hafidz.stylo.manager.TaskManager;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 import com.parse.SaveCallback;
 

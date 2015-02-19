@@ -3,8 +3,8 @@
  */
 package com.hafidz.stylo.async;
 
-import com.hafidz.stylo.Util;
-import com.hafidz.stylo.model.MemberManager;
+import com.hafidz.stylo.manager.MemberManager;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 
 import android.content.Context;

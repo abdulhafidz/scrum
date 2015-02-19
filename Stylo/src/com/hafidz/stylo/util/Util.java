@@ -1,11 +1,12 @@
 /**
  * 
  */
-package com.hafidz.stylo;
+package com.hafidz.stylo.util;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.hafidz.stylo.MainActivity;
 import com.parse.ParseACL;
 import com.parse.ParseObject;
 

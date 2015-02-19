@@ -4,7 +4,7 @@
 package com.hafidz.stylo.listener;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.Util;
+import com.hafidz.stylo.util.Util;
 
 import android.app.AlertDialog;
 import android.view.LayoutInflater;

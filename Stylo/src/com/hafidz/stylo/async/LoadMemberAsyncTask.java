@@ -7,9 +7,9 @@ import android.os.AsyncTask;
 import android.widget.EditText;
 
 import com.hafidz.stylo.R;
-import com.hafidz.stylo.Util;
+import com.hafidz.stylo.manager.MemberManager;
 import com.hafidz.stylo.model.Member;
-import com.hafidz.stylo.model.MemberManager;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 
 public class LoadMemberAsyncTask extends AsyncTask<Object, Void, Member> {

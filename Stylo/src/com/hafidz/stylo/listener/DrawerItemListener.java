@@ -4,7 +4,7 @@
 package com.hafidz.stylo.listener;
 
 import com.hafidz.stylo.MainActivity;
-import com.hafidz.stylo.Util;
+import com.hafidz.stylo.util.Util;
 
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;

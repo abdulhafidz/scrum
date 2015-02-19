@@ -1,5 +1,6 @@
 package com.hafidz.stylo;
 
+import com.hafidz.stylo.util.Util;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParsePush;

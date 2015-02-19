@@ -1,9 +1,10 @@
 /**
  * 
  */
-package com.hafidz.stylo.model;
+package com.hafidz.stylo.manager;
 
-import com.hafidz.stylo.Util;
+import com.hafidz.stylo.model.User;
+import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 import com.parse.ParseRole;
 import com.parse.ParseUser;
