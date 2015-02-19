@@ -7,10 +7,12 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.hafidz.stylo.MainActivity;
+import com.hafidz.stylo.manager.UserManager;
 import com.parse.ParseACL;
 import com.parse.ParseObject;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +35,9 @@ public class Util {
 	public static SwipeRefreshLayout mainLayout;
 	public static MainActivity mainActivity;
 	public static Context context;
+
+	// keji
+	public static boolean loginInProgress = false;
 
 	// public static int toPixels(Context context, float dp) {
 	// DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -112,7 +117,10 @@ public class Util {
 		// return "abdulhafidz@gmail.com";
 		// return "FAUZAMAN@HP";
 		// return "ETHAN@HP";
-		return "DEV";
+		// return "DEV";
+		if (UserManager.getCurrentUser() == null)
+			return null;
+		return UserManager.getCurrentUser().getDefaultBoard();
 	}
 
 	public static void showError(Context context, String msg) {
@@ -173,6 +181,21 @@ public class Util {
 		// int pid = android.os.Process.myPid();
 		// android.os.Process.killProcess(pid);
 
+	}
+
+	private static ProgressDialog progressDialog;
+
+	public static void startProgressDialog(String msg) {
+		if (progressDialog == null)
+			progressDialog = new ProgressDialog(context);
+
+		progressDialog.setMessage(msg);
+		progressDialog.show();
+	}
+
+	public static void stopProgressDialog() {
+		if (progressDialog != null)
+			progressDialog.dismiss();
 	}
 
 }

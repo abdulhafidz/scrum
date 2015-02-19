@@ -24,7 +24,7 @@ public class UserManager {
 	 * @param password
 	 * @throws ParseException
 	 */
-	public static void register(String email, String password, String name)
+	public static void signUp(String email, String password, String name)
 			throws ParseException {
 		ParseUser user = new ParseUser();
 		user.setUsername(email);
@@ -49,12 +49,12 @@ public class UserManager {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static User signIn(String email, String password)
+	public static User login(String email, String password)
 			throws ParseException {
 		ParseUser parseUser = ParseUser.logIn(email, password);
 
 		return new User(parseUser.getUsername(), parseUser.getString("name"),
-				parseUser);
+				parseUser, parseUser.getObjectId());
 	}
 
 	public static User getCurrentUser() {
@@ -63,7 +63,7 @@ public class UserManager {
 
 			if (parse != null)
 				currentUser = new User(parse.getUsername(),
-						parse.getString("name"), parse);
+						parse.getString("name"), parse, parse.getObjectId());
 		}
 
 		return currentUser;

@@ -4,13 +4,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -21,7 +16,6 @@ import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -30,14 +24,13 @@ import android.widget.TextView;
 
 import com.hafidz.stylo.listener.DrawerItemListener;
 import com.hafidz.stylo.listener.GarbageListener;
-import com.hafidz.stylo.listener.LoginListener;
 import com.hafidz.stylo.listener.WhiteBoardListener;
+import com.hafidz.stylo.manager.AnonymousManager;
 import com.hafidz.stylo.manager.MemberManager;
 import com.hafidz.stylo.manager.TaskManager;
 import com.hafidz.stylo.manager.UserManager;
 import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.Task;
-import com.hafidz.stylo.model.User;
 import com.hafidz.stylo.util.Util;
 import com.parse.ParseException;
 
@@ -74,7 +67,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		// for easy access later
 		Util.mainActivity = this;
-		Util.context = getApplicationContext();
+		// Util.context = getApplicationContext();
 
 		// // - - - - - - - - - - - - -
 		// // user login [START]
@@ -207,13 +200,6 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		progress = new ProgressDialog(getApplicationContext());
 
-		// // hamburger
-		// ImageView hamburger = new ImageView(getApplicationContext());
-		// hamburger.setImageResource(android.R.drawable.ic_menu_sort_by_size);
-		// hamburger.setX(10);
-		// hamburger.setY(10);
-		// whiteBoardLayout.addView(hamburger);
-
 	}
 
 	@Override
@@ -238,7 +224,12 @@ public class MainActivity extends Activity implements OnRefreshListener {
 	protected void onResume() {
 		super.onResume();
 		onBackground = false;
-		reloadStickers();
+
+		if (UserManager.getCurrentUser() != null)
+			reloadStickers();
+		else if (!Util.loginInProgress) {
+			AnonymousManager.login();
+		}
 	}
 
 	@Override
@@ -250,6 +241,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 	public void reloadStickers() {
 
 		mainLayout.setRefreshing(true);
+
 		// progress.setTitle("Loading");
 		progress.setMessage("Loading from server...");
 		progress.show();
@@ -385,7 +377,11 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 	@Override
 	public void onRefresh() {
-		reloadStickers();
+		if (UserManager.getCurrentUser() != null)
+			reloadStickers();
+		else if (!Util.loginInProgress) {
+			AnonymousManager.login();
+		}
 
 	}
 }
