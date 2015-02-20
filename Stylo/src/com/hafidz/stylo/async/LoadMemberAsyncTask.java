@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.EditText;
 
 import com.hafidz.stylo.R;
@@ -34,7 +35,8 @@ public class LoadMemberAsyncTask extends AsyncTask<Object, Void, Member> {
 		try {
 			member = MemberManager.load((Context) args[1], (String) args[0]);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			Log.e("LoadMemberAsyncTask.doInBackground",
+					"Member not found using id " + (String) args[0], e);
 		}
 
 		return member;

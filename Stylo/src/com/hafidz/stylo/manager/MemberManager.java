@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -129,7 +130,7 @@ public class MemberManager {
 
 		// push to server
 		ParseObject parse = new ParseObject("Member");
-		parse.put("board", Util.getActiveBoard());
+		parse.put("board", BoardManager.getDefaultBoard().getId());
 		parse.put("name", member.getName());
 		if (member.getEmail() != null)
 			parse.put("email", member.getEmail());
@@ -221,22 +222,26 @@ public class MemberManager {
 	 * @return
 	 * @throws ParseException
 	 */
-	private static Map<String, Member> getAllFromDB(Context context)
-			throws ParseException {
+	private static Map<String, Member> getAllFromDB(Context context) {
 
 		Map<String, Member> members = new HashMap<String, Member>();
 
-		ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
-		query.whereEqualTo("board", Util.getActiveBoard());
-		List<ParseObject> results = query.find();
+		try {
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
+			query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
+			List<ParseObject> results = query.find();
 
-		for (ParseObject result : results) {
-			Member member = new Member(result.getString("name"),
-					result.getString("email"), false,
-					(float) result.getDouble("posY"), result);
+			for (ParseObject result : results) {
+				Member member = new Member(result.getString("name"),
+						result.getString("email"), false,
+						(float) result.getDouble("posY"), result);
 
-			members.put(member.getName(), member);
+				members.put(member.getName(), member);
+			}
+		} catch (ParseException e) {
+			Log.i("MemberManager.getAllFromDB", "No members found.", e);
 		}
+
 		return members;
 
 	}
@@ -249,17 +254,23 @@ public class MemberManager {
 	 * @return
 	 * @throws ParseException
 	 */
-	private static Member loadFromDB(Context context, String name)
-			throws ParseException {
+	private static Member loadFromDB(Context context, String name) {
 
-		ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
-		query.whereEqualTo("board", Util.getActiveBoard());
-		query.whereEqualTo("name", name);
-		ParseObject result = query.getFirst();
+		Member member = null;
 
-		Member member = new Member(result.getString("name"),
-				result.getString("email"), false,
-				(float) result.getDouble("posY"), result);
+		try {
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
+			query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
+			query.whereEqualTo("name", name);
+			ParseObject result = query.getFirst();
+
+			member = new Member(result.getString("name"),
+					result.getString("email"), false,
+					(float) result.getDouble("posY"), result);
+		} catch (ParseException e) {
+			Log.i("MemberManager.loadFromDB", "No member found with name "
+					+ name, e);
+		}
 
 		return member;
 
@@ -299,7 +310,7 @@ public class MemberManager {
 		// push
 		try {
 			ParsePush push = new ParsePush();
-			push.setChannel(Util.getActiveBoard());
+			push.setChannel(BoardManager.getDefaultBoard().getId());
 			JSONObject json = new JSONObject();
 			json.put("type", "MEMBER");
 			json.put("id", memberName);

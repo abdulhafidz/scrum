@@ -69,15 +69,9 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 
 							@Override
 							protected Task doInBackground(String... args) {
-								try {
 
-									return TaskManager.load(myContext, id);
-								} catch (ParseException e) {
-									e.printStackTrace();
+								return TaskManager.load(myContext, id);
 
-								}
-
-								return null;
 							}
 
 							@Override
@@ -138,15 +132,9 @@ public class PushReceiver extends ParsePushBroadcastReceiver {
 
 							@Override
 							protected Task doInBackground(String... args) {
-								try {
 
-									return TaskManager.load(myContext, id);
-								} catch (ParseException e) {
-									e.printStackTrace();
+								return TaskManager.load(myContext, id);
 
-								}
-
-								return null;
 							}
 
 							@Override

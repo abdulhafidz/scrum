@@ -6,14 +6,9 @@ package com.hafidz.stylo.util;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.hafidz.stylo.MainActivity;
-import com.hafidz.stylo.manager.UserManager;
-import com.parse.ParseACL;
-import com.parse.ParseObject;
-
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -22,6 +17,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.hafidz.stylo.MainActivity;
+import com.hafidz.stylo.manager.BoardManager;
+import com.hafidz.stylo.model.Board;
+import com.parse.ParseACL;
+import com.parse.ParseInstallation;
+import com.parse.ParseObject;
 
 /**
  * @author johariab
@@ -113,14 +115,8 @@ public class Util {
 		return UUID.randomUUID().toString();
 	}
 
-	public static String getActiveBoard() {
-		// return "abdulhafidz@gmail.com";
-		// return "FAUZAMAN@HP";
-		// return "ETHAN@HP";
-		// return "DEV";
-		if (UserManager.getCurrentUser() == null)
-			return null;
-		return UserManager.getCurrentUser().getDefaultBoard();
+	public static String generateBoardId() {
+		return UUID.randomUUID().toString();
 	}
 
 	public static void showError(Context context, String msg) {
@@ -165,8 +161,14 @@ public class Util {
 
 	public static void setPermissions(ParseObject parse) {
 		ParseACL parseACL = new ParseACL();
-		parseACL.setRoleWriteAccess(Util.getActiveBoard(), true);
-		parseACL.setRoleReadAccess(Util.getActiveBoard(), true);
+
+		System.out.println("Util.getActiveBoard().getRole() = = = = = "
+				+ BoardManager.getDefaultBoard().getRole());
+
+		parseACL.setRoleWriteAccess(BoardManager.getDefaultBoard().getRole(),
+				true);
+		parseACL.setRoleReadAccess(BoardManager.getDefaultBoard().getRole(),
+				true);
 		parse.setACL(parseACL);
 	}
 

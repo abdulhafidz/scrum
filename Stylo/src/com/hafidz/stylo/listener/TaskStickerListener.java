@@ -154,30 +154,30 @@ public class TaskStickerListener implements OnDragListener,
 		}
 
 		public void run() {
-			try {
-				Task task = TaskManager.load(context, taskId);
+			// try {
+			Task task = TaskManager.load(context, taskId);
 
-				Util.mainActivity.runOnUiThread(new ShowThread(dialog,
-						dialogLayout, task));
+			Util.mainActivity.runOnUiThread(new ShowThread(dialog,
+					dialogLayout, task));
 
-			} catch (ParseException e) {
-
-				e.printStackTrace();
-
-				Util.mainActivity.runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						Util.stopLoading();
-
-						dialog.dismiss();
-
-						Util.showError(context,
-								"Problem retrieving task from server.");
-
-					}
-				});
-			}
+			// } catch (ParseException e) {
+			//
+			// e.printStackTrace();
+			//
+			// Util.mainActivity.runOnUiThread(new Runnable() {
+			//
+			// @Override
+			// public void run() {
+			// Util.stopLoading();
+			//
+			// dialog.dismiss();
+			//
+			// Util.showError(context,
+			// "Problem retrieving task from server.");
+			//
+			// }
+			// });
+			// }
 		}
 	}
 
@@ -341,30 +341,30 @@ public class TaskStickerListener implements OnDragListener,
 
 		@Override
 		public void run() {
-			try {
-				Task task = TaskManager.load(context, taskId);
+			// try {
+			Task task = TaskManager.load(context, taskId);
 
-				Util.mainActivity.runOnUiThread(new ShowEditDialogThread(task,
-						editTaskLayout, dialog));
-			} catch (ParseException e) {
-
-				e.printStackTrace();
-
-				Util.mainActivity.runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						Util.stopLoading();
-
-						dialog.dismiss();
-
-						Util.showError(context,
-								"Problem retrieving task from server.");
-
-					}
-				});
-
-			}
+			Util.mainActivity.runOnUiThread(new ShowEditDialogThread(task,
+					editTaskLayout, dialog));
+			// } catch (ParseException e) {
+			//
+			// e.printStackTrace();
+			//
+			// Util.mainActivity.runOnUiThread(new Runnable() {
+			//
+			// @Override
+			// public void run() {
+			// Util.stopLoading();
+			//
+			// dialog.dismiss();
+			//
+			// Util.showError(context,
+			// "Problem retrieving task from server.");
+			//
+			// }
+			// });
+			//
+			// }
 
 		}
 

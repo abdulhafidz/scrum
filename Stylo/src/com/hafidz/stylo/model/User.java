@@ -7,14 +7,15 @@ public class User {
 	private String email;
 	private String name;
 	private ParseUser parse;
-	private String defaultBoard;
 
-	public User(String email, String name, ParseUser parse, String defaultBoard) {
+	// private String defaultBoard;
+
+	public User(String email, String name, ParseUser parse) {
 
 		this.email = email;
 		this.parse = parse;
 		this.name = name;
-		this.defaultBoard = defaultBoard;
+		// this.defaultBoard = defaultBoard;
 	}
 
 	public String getEmail() {
@@ -29,8 +30,8 @@ public class User {
 		return name;
 	}
 
-	public String getDefaultBoard() {
-		return this.defaultBoard;
-	}
+	// public String getDefaultBoard() {
+	// return this.defaultBoard;
+	// }
 
 }

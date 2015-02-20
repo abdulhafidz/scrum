@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -200,6 +201,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		progress = new ProgressDialog(getApplicationContext());
 
+		// load stickers
+		reloadStickers();
 	}
 
 	@Override
@@ -225,11 +228,17 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		super.onResume();
 		onBackground = false;
 
-		if (UserManager.getCurrentUser() != null)
-			reloadStickers();
-		else if (!Util.loginInProgress) {
-			AnonymousManager.login();
-		}
+		// if (!Util.loginInProgress) {
+		// if (UserManager.getCurrentUser() != null
+		// && Util.getActiveBoard() != null) {
+		// reloadStickers();
+		// } else {
+		// AnonymousManager.login();
+		// }
+		//
+		// // AnonymousManager.login();
+		// }
+		// reloadStickers();
 	}
 
 	@Override
@@ -242,7 +251,6 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		mainLayout.setRefreshing(true);
 
-		// progress.setTitle("Loading");
 		progress.setMessage("Loading from server...");
 		progress.show();
 
@@ -305,6 +313,10 @@ public class MainActivity extends Activity implements OnRefreshListener {
 				activity.runOnUiThread(new StickerLoaderUI(members, tasks));
 
 			} catch (ParseException e1) {
+
+				Log.e("MainActivity.StickerLoader", "Load stickers problem.",
+						e1);
+
 				activity.runOnUiThread(new Runnable() {
 
 					@Override
@@ -377,11 +389,6 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 	@Override
 	public void onRefresh() {
-		if (UserManager.getCurrentUser() != null)
-			reloadStickers();
-		else if (!Util.loginInProgress) {
-			AnonymousManager.login();
-		}
-
+		reloadStickers();
 	}
 }

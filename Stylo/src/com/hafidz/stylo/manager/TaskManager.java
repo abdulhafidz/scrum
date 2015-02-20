@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.GridLayout;
@@ -200,19 +201,25 @@ public class TaskManager {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static Task load(Context context, String taskId)
-			throws ParseException {
+	public static Task load(Context context, String taskId) {
 
-		ParseObject result = loadFromDB(context, taskId);
+		Task task = null;
 
-		Task task = new Task(result.getString("id"),
-				(float) result.getDouble("posX"),
-				(float) result.getDouble("posY"), result);
-		task.setTitle(result.getString("title"));
-		task.setDescription(result.getString("description"));
-		if (result.getString("owner") != null)
-			task.setOwner(result.getString("owner"));
-		task.setStatus(result.getInt("status"));
+		try {
+			ParseObject result = loadFromDB(context, taskId);
+
+			task = new Task(result.getString("id"),
+					(float) result.getDouble("posX"),
+					(float) result.getDouble("posY"), result);
+			task.setTitle(result.getString("title"));
+			task.setDescription(result.getString("description"));
+			if (result.getString("owner") != null)
+				task.setOwner(result.getString("owner"));
+			task.setStatus(result.getInt("status"));
+		} catch (ParseException e) {
+			Log.i(TaskManager.class.getSimpleName(), "No task found with id "
+					+ taskId, e);
+		}
 
 		return task;
 
@@ -254,7 +261,7 @@ public class TaskManager {
 		// push
 		try {
 			ParsePush push = new ParsePush();
-			push.setChannel(Util.getActiveBoard());
+			push.setChannel(BoardManager.getDefaultBoard().getId());
 			JSONObject json = new JSONObject();
 			json.put("type", "TASK");
 			json.put("id", taskId);
@@ -292,7 +299,7 @@ public class TaskManager {
 
 		// push to server
 		ParseObject parse = new ParseObject("Task");
-		parse.put("board", Util.getActiveBoard());
+		parse.put("board", BoardManager.getDefaultBoard().getId());
 		parse.put("id", task.getId());
 		if (task.getTitle() != null)
 			parse.put("title", task.getTitle());
@@ -499,30 +506,33 @@ public class TaskManager {
 
 	}
 
-	private static Map<String, Task> getAllFromDB(Context context)
-			throws ParseException {
+	private static Map<String, Task> getAllFromDB(Context context) {
 
 		Map<String, Task> tasks = new HashMap<String, Task>();
 
-		ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
+		try {
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
 
-		query.whereEqualTo("board", Util.getActiveBoard());
-		List<ParseObject> results = query.find();
+			query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
+			List<ParseObject> results = query.find();
 
-		for (ParseObject result : results) {
-			Task task = new Task(result.getString("id"),
-					(float) result.getDouble("posX"),
-					(float) result.getDouble("posY"), result);
-			task.setTitle(result.getString("title"));
-			task.setDescription(result.getString("description"));
-			if (result.getString("owner") != null)
-				task.setOwner(result.getString("owner"));
-			task.setStatus(result.getInt("status"));
+			for (ParseObject result : results) {
+				Task task = new Task(result.getString("id"),
+						(float) result.getDouble("posX"),
+						(float) result.getDouble("posY"), result);
+				task.setTitle(result.getString("title"));
+				task.setDescription(result.getString("description"));
+				if (result.getString("owner") != null)
+					task.setOwner(result.getString("owner"));
+				task.setStatus(result.getInt("status"));
 
-			tasks.put(task.getId(), task);
+				tasks.put(task.getId(), task);
 
-			// add to cache
-			TaskManager.parseObjects.put(task.getId(), result);
+				// add to cache
+				TaskManager.parseObjects.put(task.getId(), result);
+			}
+		} catch (ParseException e) {
+			Log.i(TaskManager.class.getSimpleName(), "No tasks found", e);
 		}
 
 		return tasks;
@@ -541,7 +551,7 @@ public class TaskManager {
 			throws ParseException {
 
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-		query.whereEqualTo("board", Util.getActiveBoard());
+		query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
 		query.whereEqualTo("id", taskId);
 		ParseObject result = query.getFirst();
 
