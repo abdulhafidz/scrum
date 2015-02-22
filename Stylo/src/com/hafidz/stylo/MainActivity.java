@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -26,10 +25,8 @@ import android.widget.TextView;
 import com.hafidz.stylo.listener.DrawerItemListener;
 import com.hafidz.stylo.listener.GarbageListener;
 import com.hafidz.stylo.listener.WhiteBoardListener;
-import com.hafidz.stylo.manager.AnonymousManager;
 import com.hafidz.stylo.manager.MemberManager;
 import com.hafidz.stylo.manager.TaskManager;
-import com.hafidz.stylo.manager.UserManager;
 import com.hafidz.stylo.model.Member;
 import com.hafidz.stylo.model.Task;
 import com.hafidz.stylo.util.Util;
@@ -57,7 +54,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 	private DrawerLayout drawerLayout;
 	private ListView drawerList;
 
-	private ProgressDialog progress;
+	// private ProgressDialog progress;
 
 	// determine app is foreground or background
 	public static boolean onBackground = false;
@@ -68,7 +65,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		// for easy access later
 		Util.mainActivity = this;
-		// Util.context = getApplicationContext();
+		Util.context = getApplicationContext();
 
 		// // - - - - - - - - - - - - -
 		// // user login [START]
@@ -199,7 +196,7 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		// for easy access later
 		Util.mainLayout = mainLayout;
 
-		progress = new ProgressDialog(getApplicationContext());
+		// progress = new ProgressDialog(getApplicationContext());
 
 		// load stickers
 		reloadStickers();
@@ -251,8 +248,9 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 		mainLayout.setRefreshing(true);
 
-		progress.setMessage("Loading from server...");
-		progress.show();
+		// progress.setMessage("Loading from server...");
+		// progress.show();
+		Util.showProgressDialog("Loading stickers...");
 
 		// clear all sticker
 		Util.whiteboardLayout.removeAllViews();
@@ -324,7 +322,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 						Util.showError(getApplicationContext(),
 								"Problem loading sticker(s) from server.");
 						mainLayout.setRefreshing(false);
-						progress.dismiss();
+						// progress.dismiss();
+						Util.stopProgressDialog();
 
 					}
 				});
@@ -379,9 +378,8 @@ public class MainActivity extends Activity implements OnRefreshListener {
 
 			mainLayout.setRefreshing(false);
 
-			progress.dismiss();
-			// Toast.makeText(getApplicationContext(), "Welcome!",
-			// Toast.LENGTH_SHORT).show();
+			// progress.dismiss();
+			Util.stopProgressDialog();
 
 		}
 

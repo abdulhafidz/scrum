@@ -187,12 +187,16 @@ public class Util {
 
 	private static ProgressDialog progressDialog;
 
-	public static void startProgressDialog(String msg) {
+	public static void showProgressDialog(String msg) {
 		if (progressDialog == null)
 			progressDialog = new ProgressDialog(context);
 
 		progressDialog.setMessage(msg);
-		progressDialog.show();
+
+		if (!progressDialog.isShowing()) {
+			System.out.println("context = " + context);
+			progressDialog.show();
+		}
 	}
 
 	public static void stopProgressDialog() {

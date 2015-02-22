@@ -53,6 +53,8 @@ public class AnonymousManager {
 			// success
 			if (exception == null) {
 
+				// Util.showProgressDialog("Logged in.");
+
 				AsyncTask<ParseUser, Void, ParseException> bgTask = new AsyncTask<ParseUser, Void, ParseException>() {
 					@Override
 					protected ParseException doInBackground(ParseUser... user) {
@@ -63,6 +65,8 @@ public class AnonymousManager {
 									.loadDefaultBoard();
 
 							if (defaultBoard == null) {
+								// Util.showProgressDialog("Default board not found.");
+
 								String boardId = Util.generateBoardId();
 
 								// create role for board
@@ -73,47 +77,64 @@ public class AnonymousManager {
 								Board newBoard = new Board(boardId,
 										"Default Board", user[0].getObjectId(),
 										true, role);
+
+								// Util.showProgressDialog("Creating default board.");
+
 								BoardManager.add(newBoard);
 
+								// Util.showProgressDialog("Default board created.");
+
 								defaultBoard = newBoard;
+							} else {
+								// Util.showProgressDialog("Default board found.");
 							}
 
 							// set default board to user object
+							// Util.showProgressDialog("Assigning board to user.");
 							user[0].put("defaultBoard", defaultBoard.getId());
 							user[0].saveInBackground(new SaveCallback() {
 
 								@Override
 								public void done(ParseException e) {
-									if (e == null)
+									if (e == null) {
+										// Util.showProgressDialog("Done assigning board to user.");
 										Log.i("AnonymousManager.login",
 												"Success saving user.");
-									else
+									} else {
+										// Util.showProgressDialog("Failed assigning board to user.");
+
 										Log.e("AnonymousManager.login",
 												"Failed saving user", e);
+									}
 
 								}
 							});
 
 							if (subscribeBackground) {
+								// Util.showProgressDialog("Subscribing push.");
 								ParsePush.subscribeInBackground(
 										defaultBoard.getId(),
 										new SaveCallback() {
 
 											@Override
 											public void done(ParseException e) {
-												if (e == null)
+												if (e == null) {
+													// Util.showProgressDialog("Done subscribing push.");
 													Log.i("AnonymousManager.login",
 															"Success subscribe in backgroud.");
-												else
+												} else {
+													// Util.showProgressDialog("Failed subscribing push.");
 													Log.e("AnonymousManager.login",
 															"Failed subscribe in background",
 															e);
+												}
 
 											}
 										});
 							}
 
 							// tie user with installation
+							// Util.showProgressDialog("Linking user with Installation.");
 							ParseInstallation installation = ParseInstallation
 									.getCurrentInstallation();
 							System.out
@@ -124,12 +145,15 @@ public class AnonymousManager {
 
 								@Override
 								public void done(ParseException e) {
-									if (e == null)
+									if (e == null) {
+										// Util.showProgressDialog("Done linking user with Installation.");
 										Log.i("AnonymousManager.login",
 												"Success saving installation.");
-									else
+									} else {
+										// Util.showProgressDialog("Problem linking user with Installation.");
 										Log.e("AnonymousManager.login",
 												"Failed saving installation", e);
+									}
 
 								}
 							});
@@ -142,6 +166,9 @@ public class AnonymousManager {
 											+ defaultBoard.getId());
 
 						} catch (ParseException e) {
+
+							// Util.showProgressDialog("Problem with new user initialization.");
+
 							Log.e(AnonymousManager.class.getSimpleName(),
 									e.getCode() + " : "
 											+ e.getLocalizedMessage());
@@ -161,10 +188,12 @@ public class AnonymousManager {
 				bgTask.execute(user);
 
 			} else {
+				// Util.showProgressDialog("Problem logging in anonymously.");
+
 				Log.e("AnonymousManager.login", "Problem anonymous login.",
 						exception);
-				Util.showError(Util.context,
-						"Problem signing in anonymous user.");
+				// Util.showError(Util.context,
+				// "Problem signing in anonymous user.");
 			}
 
 		}
