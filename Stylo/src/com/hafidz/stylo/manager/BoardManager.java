@@ -25,7 +25,17 @@ public class BoardManager {
 	private static Board defaultBoard;
 	private static Board currentBoard;
 
+	/**
+	 * MUST BE RAN IN BACKGROUND THREAD!!!
+	 * 
+	 * @param name
+	 * @return
+	 * @throws ParseException
+	 */
 	public static ParseRole createRole(String name) throws ParseException {
+
+		Log.i("BoardManager.createRole", "Creating new Role with name " + name);
+
 		// role
 		ParseRole role = new ParseRole(name);
 		role.getRelation("users").add(UserManager.getCurrentUser().getParse());
@@ -68,6 +78,7 @@ public class BoardManager {
 		parseBoard.setACL(boardACL);
 
 		parseBoard.save();
+
 	}
 
 	/**
@@ -193,9 +204,36 @@ public class BoardManager {
 
 			for (ParseObject obj : results) {
 
+				System.out.println("obj.getString(\"id\") = = = "
+						+ obj.getString("id"));
+				// get the role (name of the role should be the same as board
+				// id)
+				ParseRole role = null;
+				try {
+					role = ParseRole.getQuery()
+							.whereEqualTo("name", obj.getString("id"))
+							.getFirst();
+
+					Log.i("BoardManager.getAll",
+							"role with name '" + role.getName()
+									+ "' bind with board with (String) id '"
+									+ obj.getString("id") + "'");
+				} catch (ParseException e) {
+					Log.e("BoardManager.getAll",
+							e.getCode() + ": " + e.getLocalizedMessage());
+				}
+
+				// // not going to happen, but....
+				// if (role == null) {
+				// Log.e("BoardManager.getAll",
+				// "Cannot found role? This is weird. 1 Board should have 1 Role. Nevermind, we create a new role");
+				//
+				// role = BoardManager.createRole(obj.getString("id"));
+				// }
+
 				Board board = new Board(obj.getObjectId(),
 						obj.getString("name"), obj.getString("owner"),
-						obj.getBoolean("defaultBoard"), null);
+						obj.getBoolean("defaultBoard"), role);
 
 				boards.add(board);
 			}

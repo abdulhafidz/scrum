@@ -14,6 +14,7 @@ import com.parse.ParseException;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.database.DataSetObserver;
 import android.os.AsyncTask;
 import android.support.v4.widget.DrawerLayout;
@@ -53,6 +54,7 @@ public class DrawerItemListener implements ListView.OnItemClickListener {
 			drawerLayout.closeDrawers();
 			break;
 
+		// SWITCH BOARD
 		case 1:
 			drawerLayout.closeDrawers();
 			AlertDialog.Builder dialogBuilder = new Builder(Util.context);
@@ -97,13 +99,34 @@ public class DrawerItemListener implements ListView.OnItemClickListener {
 			bgTask.execute();
 			break;
 
+		// Create Board
 		case 2:
+
+			AlertDialog.Builder builder = new Builder(Util.context);
+			builder.setTitle("Create Board");
+			View boardCreateLayout = LayoutInflater.from(Util.context).inflate(
+					R.layout.board_create_layout, null);
+			builder.setView(boardCreateLayout);
+			builder.setPositiveButton(android.R.string.ok, null);
+			builder.setNegativeButton(android.R.string.cancel, null);
+			AlertDialog dialog = builder.create();
+			dialog.show();
+
+			dialog.getButton(Dialog.BUTTON_POSITIVE).setOnClickListener(
+					new BoardCreateListener(dialog));
+
+			drawerLayout.closeDrawers();
+			break;
+
+		// Guide
+		case 3:
 			Util.showGuide(main.getApplicationContext());
 
 			drawerLayout.closeDrawers();
 			break;
 
-		case 3:
+		// About
+		case 4:
 			Util.showAbout(main.getApplicationContext());
 
 			drawerLayout.closeDrawers();
