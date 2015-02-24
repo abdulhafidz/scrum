@@ -130,7 +130,7 @@ public class MemberManager {
 
 		// push to server
 		ParseObject parse = new ParseObject("Member");
-		parse.put("board", BoardManager.getDefaultBoard().getId());
+		parse.put("board", BoardManager.getCurrentBoard().getId());
 		parse.put("name", member.getName());
 		if (member.getEmail() != null)
 			parse.put("email", member.getEmail());
@@ -228,7 +228,7 @@ public class MemberManager {
 
 		try {
 			ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
-			query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
+			query.whereEqualTo("board", BoardManager.getCurrentBoard().getId());
 			List<ParseObject> results = query.find();
 
 			for (ParseObject result : results) {
@@ -260,7 +260,7 @@ public class MemberManager {
 
 		try {
 			ParseQuery<ParseObject> query = ParseQuery.getQuery("Member");
-			query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
+			query.whereEqualTo("board", BoardManager.getCurrentBoard().getId());
 			query.whereEqualTo("name", name);
 			ParseObject result = query.getFirst();
 
@@ -310,7 +310,7 @@ public class MemberManager {
 		// push
 		try {
 			ParsePush push = new ParsePush();
-			push.setChannel(BoardManager.getDefaultBoard().getId());
+			push.setChannel(BoardManager.getCurrentBoard().getId());
 			JSONObject json = new JSONObject();
 			json.put("type", "MEMBER");
 			json.put("id", memberName);

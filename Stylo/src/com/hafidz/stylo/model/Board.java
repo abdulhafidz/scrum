@@ -47,4 +47,9 @@ public class Board {
 		return role;
 	}
 
+	@Override
+	public String toString() {
+		return name;
+	}
+
 }

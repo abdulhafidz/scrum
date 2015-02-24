@@ -3,6 +3,9 @@
  */
 package com.hafidz.stylo.manager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.util.Log;
 
 import com.hafidz.stylo.model.Board;
@@ -19,7 +22,8 @@ import com.parse.ParseRole;
  */
 public class BoardManager {
 
-	public static Board defaultBoard;
+	private static Board defaultBoard;
+	private static Board currentBoard;
 
 	public static ParseRole createRole(String name) throws ParseException {
 		// role
@@ -128,6 +132,10 @@ public class BoardManager {
 
 	}
 
+	public static void setDefaultBoard(Board board) {
+		defaultBoard = board;
+	}
+
 	/**
 	 * MUST BE CALLED IN BACKGROUND TREAD ONLY!!!
 	 * 
@@ -150,6 +158,53 @@ public class BoardManager {
 				+ defaultBoard.getId());
 
 		return BoardManager.defaultBoard;
+	}
+
+	/**
+	 * MUST BE CALLED IN BACKGROUND TREAD ONLY!!!
+	 * 
+	 * @return
+	 */
+	public static Board getCurrentBoard() {
+		if (currentBoard == null) {
+			Log.i("BoardManager.getCurrentBoard",
+					"Current Board is not available, assigning default board to current board.");
+			currentBoard = getDefaultBoard();
+		}
+		return currentBoard;
+	}
+
+	public static void setCurrentBoard(Board board) {
+		Log.i("BoardManager.setCurrentBoard",
+				"Current Board is now " + board.getName());
+		BoardManager.currentBoard = board;
+	}
+
+	/**
+	 * MUST BE CALLED IN BACKGROUND TREAD ONLY!!!
+	 */
+	public static List<Board> getAll() {
+
+		List<Board> boards = new ArrayList<Board>();
+
+		try {
+			ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Board");
+			List<ParseObject> results = query.find();
+
+			for (ParseObject obj : results) {
+
+				Board board = new Board(obj.getObjectId(),
+						obj.getString("name"), obj.getString("owner"),
+						obj.getBoolean("defaultBoard"), null);
+
+				boards.add(board);
+			}
+
+		} catch (ParseException e) {
+			Log.i("BoardManager.getAll", "No Board found.");
+		}
+
+		return boards;
 	}
 
 }

@@ -261,7 +261,7 @@ public class TaskManager {
 		// push
 		try {
 			ParsePush push = new ParsePush();
-			push.setChannel(BoardManager.getDefaultBoard().getId());
+			push.setChannel(BoardManager.getCurrentBoard().getId());
 			JSONObject json = new JSONObject();
 			json.put("type", "TASK");
 			json.put("id", taskId);
@@ -299,7 +299,7 @@ public class TaskManager {
 
 		// push to server
 		ParseObject parse = new ParseObject("Task");
-		parse.put("board", BoardManager.getDefaultBoard().getId());
+		parse.put("board", BoardManager.getCurrentBoard().getId());
 		parse.put("id", task.getId());
 		if (task.getTitle() != null)
 			parse.put("title", task.getTitle());
@@ -506,6 +506,12 @@ public class TaskManager {
 
 	}
 
+	/**
+	 * MUST BE RAN IN A BACKGROUND THREAD!!!
+	 * 
+	 * @param context
+	 * @return
+	 */
 	private static Map<String, Task> getAllFromDB(Context context) {
 
 		Map<String, Task> tasks = new HashMap<String, Task>();
@@ -513,7 +519,11 @@ public class TaskManager {
 		try {
 			ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
 
-			query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
+			Log.i("TaskManager.getAllFromDB",
+					"Retrieving all tasks for with board value "
+							+ BoardManager.getCurrentBoard().getId());
+
+			query.whereEqualTo("board", BoardManager.getCurrentBoard().getId());
 			List<ParseObject> results = query.find();
 
 			for (ParseObject result : results) {
@@ -551,7 +561,7 @@ public class TaskManager {
 			throws ParseException {
 
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Task");
-		query.whereEqualTo("board", BoardManager.getDefaultBoard().getId());
+		query.whereEqualTo("board", BoardManager.getCurrentBoard().getId());
 		query.whereEqualTo("id", taskId);
 		ParseObject result = query.getFirst();
 

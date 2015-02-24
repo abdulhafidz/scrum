@@ -74,9 +74,8 @@ public class AnonymousManager {
 										.createRole(boardId);
 
 								// create default board
-								Board newBoard = new Board(boardId,
-										"Default Board", user[0].getObjectId(),
-										true, role);
+								Board newBoard = new Board(boardId, "My Board",
+										user[0].getObjectId(), true, role);
 
 								// Util.showProgressDialog("Creating default board.");
 
@@ -138,8 +137,7 @@ public class AnonymousManager {
 							ParseInstallation installation = ParseInstallation
 									.getCurrentInstallation();
 							System.out
-									.println("installation 11111111111111111 = "
-											+ installation);
+									.println("installation = " + installation);
 							installation.put("user", user[0]);
 							installation.saveInBackground(new SaveCallback() {
 
@@ -159,10 +157,11 @@ public class AnonymousManager {
 							});
 
 							// for easy access
-							BoardManager.defaultBoard = defaultBoard;
+							BoardManager.setDefaultBoard(defaultBoard);
+							BoardManager.setCurrentBoard(defaultBoard);
 
-							Log.i(AnonymousManager.class.getSimpleName(),
-									"BoardManager.defaultBoard.getId()  = = = "
+							Log.i("AnonymousManager.SignInCallback.done",
+									"Default Board ID = "
 											+ defaultBoard.getId());
 
 						} catch (ParseException e) {

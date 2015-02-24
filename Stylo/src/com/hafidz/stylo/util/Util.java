@@ -162,12 +162,9 @@ public class Util {
 	public static void setPermissions(ParseObject parse) {
 		ParseACL parseACL = new ParseACL();
 
-		System.out.println("Util.getActiveBoard().getRole() = = = = = "
-				+ BoardManager.getDefaultBoard().getRole());
-
-		parseACL.setRoleWriteAccess(BoardManager.getDefaultBoard().getRole(),
+		parseACL.setRoleWriteAccess(BoardManager.getCurrentBoard().getRole(),
 				true);
-		parseACL.setRoleReadAccess(BoardManager.getDefaultBoard().getRole(),
+		parseACL.setRoleReadAccess(BoardManager.getCurrentBoard().getRole(),
 				true);
 		parse.setACL(parseACL);
 	}

@@ -132,8 +132,9 @@ public class MainActivity extends Activity implements OnRefreshListener {
 		drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
 		drawerList = (ListView) findViewById(R.id.drawerList);
 		ArrayAdapter<String> drawerAdapter = new ArrayAdapter<String>(
-				getApplicationContext(), android.R.layout.simple_list_item_1,
-				new String[] { "Refresh", "User Guide", "About" });
+				getApplicationContext(),
+				android.R.layout.simple_list_item_1,
+				new String[] { "Refresh", "Switch Board", "User Guide", "About" });
 		drawerList.setAdapter(drawerAdapter);
 		drawerList.setOnItemClickListener(new DrawerItemListener(this,
 				drawerLayout));
